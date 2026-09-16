@@ -1,0 +1,45 @@
+<div class="home-container">
+  <section class="top-movies">
+    <h2>🔥 Top 3 Películas más vendidas</h2>
+    <div class="movies-grid">
+      @for (movie of topMovies; track movie.id) {
+        <div class="movie-card">
+          <img [src]="movie.imagen_url || 'assets/placeholder.jpg'" [alt]="movie.titulo">
+          <div class="movie-info">
+            <h3>{{ movie.titulo }}</h3>
+            <p>{{ movie.duracion_minutos }} min | {{ movie.restriccion_edad }}</p>
+            <button class="btn-primary">Ver Funciones</button>
+          </div>
+        </div>
+      } @empty {
+        <p>No hay películas destacadas en este momento.</p>
+      }
+    </div>
+  </section>
+
+  <section class="all-movies">
+    <div class="section-header">
+      <h2>En Cartelera</h2>
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Buscar por título..." 
+        (input)="onSearch($event)">
+    </div>
+    
+    <div class="movies-grid">
+       @for (movie of filteredMovies; track movie.id) {
+        <div class="movie-card">
+          <img [src]="movie.imagen_url || 'assets/placeholder.jpg'" [alt]="movie.titulo">
+          <div class="movie-info">
+            <h3>{{ movie.titulo }}</h3>
+            <p>{{ movie.duracion_minutos }} min | {{ movie.restriccion_edad }}</p>
+            <button class="btn-primary">Comprar Entrada</button>
+          </div>
+        </div>
+      } @empty {
+        <p>No se encontraron películas para tu búsqueda.</p>
+      }
+    </div>
+  </section>
+</div>

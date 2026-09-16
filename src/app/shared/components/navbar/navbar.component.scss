@@ -1,0 +1,31 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--surface-color);
+  padding: 15px 40px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+
+  .navbar-brand a {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+
+  .navbar-menu {
+    display: flex;
+    gap: 20px;
+
+    a {
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+
+      &:hover {
+        color: var(--primary-color);
+      }
+    }
+  }
+}

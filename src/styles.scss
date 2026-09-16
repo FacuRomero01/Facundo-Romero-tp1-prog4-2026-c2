@@ -1,0 +1,45 @@
+/* VARIABLES GLOBALES - TEMA OSCURO (ESTILO CINE) */
+:root {
+  --primary-color: #e50914; /* Rojo estilo cine/Netflix */
+  --bg-color: #141414; /* Fondo oscuro */
+  --surface-color: #1f1f1f;
+  --text-color: #ffffff;
+  --text-muted: #b3b3b3;
+  --font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+}
+
+.main-container {
+  min-height: calc(100vh - 60px); /* Restamos la altura del navbar */
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* UTILIDADES */
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  
+  &:hover {
+    background-color: #b20710;
+  }
+}
