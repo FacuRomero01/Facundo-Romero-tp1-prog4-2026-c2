@@ -8,7 +8,7 @@
           <div class="movie-info">
             <h3>{{ movie.titulo }}</h3>
             <p>{{ movie.duracion_minutos }} min | {{ movie.restriccion_edad }}</p>
-            <button class="btn-primary">Ver Funciones</button>
+            <button class="btn-primary" [routerLink]="['/checkout', movie.id]">Ver Funciones</button>
           </div>
         </div>
       } @empty {
@@ -34,7 +34,7 @@
           <div class="movie-info">
             <h3>{{ movie.titulo }}</h3>
             <p>{{ movie.duracion_minutos }} min | {{ movie.restriccion_edad }}</p>
-            <button class="btn-primary">Comprar Entrada</button>
+            <button class="btn-primary" [routerLink]="['/checkout', movie.id]">Comprar Entrada</button>
           </div>
         </div>
       } @empty {

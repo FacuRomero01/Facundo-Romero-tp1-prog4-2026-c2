@@ -1,0 +1,74 @@
+<div class="payment-container">
+  @if (!isPaid) {
+    <div class="summary-card">
+      <h3>Resumen de Compra</h3>
+      
+      <div class="summary-section">
+        <h4>Entradas</h4>
+        @for (seat of selectedSeats(); track seat.id) {
+          <div class="summary-row">
+            <span>Butaca {{ seat.id }} ({{ seat.type }})</span>
+            <span>{{ basePrice * seat.priceMultiplier | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+        }
+        @empty {
+          <p class="empty-text">No seleccionaste butacas.</p>
+        }
+      </div>
+
+      <div class="summary-section">
+        <h4>Candy Bar</h4>
+        @for (item of bookingService.candyItems(); track item.id) {
+          @if (item.quantity > 0) {
+            <div class="summary-row">
+              <span>{{ item.quantity }}x {{ item.name }}</span>
+              <span>{{ item.price * item.quantity | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+          }
+        }
+      </div>
+
+      <hr>
+
+      <div class="summary-row total">
+        <span>Subtotal</span>
+        <span>{{ totalCost() | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+      </div>
+
+      <div class="credits-section">
+        <label>
+          <input type="checkbox" [checked]="useCredits" (change)="toggleCredits()">
+          Usar saldo a favor ({{ userCredits | currency:'ARS':'symbol-narrow':'1.0-0' }})
+        </label>
+      </div>
+
+      <div class="summary-row final-total">
+        <span>Total a Pagar</span>
+        <span>{{ finalCost() | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+      </div>
+
+      <button class="btn-primary w-100 mt-2" (click)="confirmPayment()" [disabled]="selectedSeats().length === 0">
+        Confirmar Pago
+      </button>
+    </div>
+  } @else {
+    <div class="ticket-card text-center">
+      <h3>¡Reserva Confirmada!</h3>
+      <p>Presentá este código QR en el ingreso de la sala.</p>
+      
+      <div class="qr-container">
+        <img [src]="qrCodeUrl" alt="Código QR de la Entrada">
+      </div>
+      
+      <div class="ticket-details">
+        <p><strong>Función:</strong> {{ bookingService.selectedFuncion()?.fecha_hora | date:'short' }}</p>
+        <p><strong>Sala:</strong> {{ bookingService.selectedFuncion()?.salas?.nombre }}</p>
+        <p><strong>Butacas:</strong> 
+          @for (seat of selectedSeats(); track seat.id; let last = $last) {
+            {{ seat.id }}{{ !last ? ', ' : '' }}
+          }
+        </p>
+      </div>
+    </div>
+  }
+</div>

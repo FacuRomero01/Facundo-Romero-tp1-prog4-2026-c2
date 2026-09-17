@@ -1,0 +1,19 @@
+<div class="candy-bar-container">
+  <div class="candy-grid">
+    @for (item of bookingService.candyItems(); track item.id) {
+      <div class="candy-card">
+        <div class="candy-icon">{{ item.imageUrl }}</div>
+        <div class="candy-info">
+          <h4>{{ item.name }}</h4>
+          <p>{{ item.description }}</p>
+          <span class="price">{{ item.price | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+        </div>
+        <div class="candy-actions">
+          <button class="btn-icon" (click)="decrementQuantity(item)" [disabled]="item.quantity === 0">-</button>
+          <span class="quantity">{{ item.quantity }}</span>
+          <button class="btn-icon" (click)="incrementQuantity(item)">+</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

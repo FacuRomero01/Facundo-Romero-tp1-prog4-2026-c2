@@ -5,6 +5,12 @@
   <div class="navbar-menu">
     <a routerLink="/">Cartelera</a>
     <a routerLink="/admin">Panel Admin</a>
-    <a routerLink="/profile">Mi Perfil</a>
+    
+    @if (isLoggedIn) {
+      <a routerLink="/profile">Mi Perfil</a>
+      <a href="#" (click)="logout(); $event.preventDefault()">Cerrar Sesión</a>
+    } @else {
+      <a routerLink="/login">Iniciar Sesión</a>
+    }
   </div>
 </nav>

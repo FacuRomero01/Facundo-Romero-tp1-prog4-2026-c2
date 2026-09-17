@@ -1,0 +1,87 @@
+.candy-bar-container {
+  margin-top: 1rem;
+}
+
+.candy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.candy-card {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border: 1px solid #444;
+
+  .candy-icon {
+    font-size: 3rem;
+    text-align: center;
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .candy-info {
+    flex-grow: 1;
+
+    h4 {
+      margin: 0 0 0.5rem;
+      color: #fff;
+    }
+
+    p {
+      margin: 0 0 1rem;
+      font-size: 0.85rem;
+      color: #bbb;
+    }
+
+    .price {
+      font-weight: bold;
+      color: #e50914;
+      font-size: 1.1rem;
+    }
+  }
+
+  .candy-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1a1a1a;
+    border-radius: 20px;
+    padding: 0.25rem;
+
+    .btn-icon {
+      background: #333;
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: background 0.2s;
+
+      &:hover:not([disabled]) {
+        background: #e50914;
+      }
+
+      &[disabled] {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .quantity {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #fff;
+    }
+  }
+}

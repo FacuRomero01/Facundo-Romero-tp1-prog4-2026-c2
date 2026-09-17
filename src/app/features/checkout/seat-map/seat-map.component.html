@@ -1,0 +1,36 @@
+<div class="seat-map-container">
+  <div class="screen-indicator">
+    <div class="screen">PANTALLA</div>
+  </div>
+
+  <div class="seats-grid">
+    @for (row of bookingService.rows; track row) {
+      <div class="seat-row">
+        <span class="row-label">{{ row }}</span>
+        
+        <!-- Simulamos las butacas de esta fila -->
+        <div class="row-seats">
+          @for (seat of bookingService.seats(); track seat.id) {
+            @if (seat.row === row) {
+              <div 
+                class="seat" 
+                [ngClass]="[seat.status, seat.type]"
+                (click)="toggleSeat(seat)"
+                [title]="'Fila ' + seat.row + ' Columna ' + seat.col + ' - ' + (seat.type === 'vip' ? 'VIP ($$$)' : (seat.type === 'accessible' ? 'Accesible' : 'Estándar'))">
+                {{ seat.col }}
+              </div>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="leyenda">
+    <div class="legend-item"><div class="seat available"></div> Disponible</div>
+    <div class="legend-item"><div class="seat occupied"></div> Ocupada</div>
+    <div class="legend-item"><div class="seat selected"></div> Tu selección</div>
+    <div class="legend-item"><div class="seat vip"></div> VIP (Filas R, S, T)</div>
+    <div class="legend-item"><div class="seat accessible"></div> Accesible (Filas J, K)</div>
+  </div>
+</div>

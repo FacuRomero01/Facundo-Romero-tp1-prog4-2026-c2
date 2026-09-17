@@ -1,0 +1,70 @@
+<div class="booking-container main-container">
+  <h2>Proceso de Compra</h2>
+  
+  <div class="stepper">
+    <div class="step" [class.active]="currentStep >= 1">1. Función</div>
+    <div class="step" [class.active]="currentStep >= 2">2. Butacas</div>
+    <div class="step" [class.active]="currentStep >= 3">3. Candy Bar</div>
+    <div class="step" [class.active]="currentStep >= 4">4. Pago</div>
+  </div>
+
+  <div class="step-content">
+    @if (currentStep === 1) {
+      <div class="date-time-selection">
+        <h3>Selecciona un Horario (Sin scroll molesto)</h3>
+        
+        <div class="funciones-grid">
+          @for (funcion of funciones; track funcion.id) {
+            <div class="funcion-card" (click)="seleccionarFuncion(funcion)">
+              <div class="date">{{ funcion.fecha_hora | date:'EEE d MMM' }}</div>
+              <div class="time">{{ funcion.fecha_hora | date:'shortTime' }}</div>
+              <div class="details">
+                <span class="badge">{{ funcion.formato }}</span>
+                <span class="badge">{{ funcion.idioma }}</span>
+              </div>
+              <div class="room">{{ funcion.salas?.nombre }}</div>
+            </div>
+          } @empty {
+            <p>No hay funciones programadas para esta película.</p>
+          }
+        </div>
+      </div>
+    }
+
+    @if (currentStep === 2) {
+      <h3>Elige tus butacas</h3>
+      <p class="subtitle">Las butacas se actualizan en tiempo real. 
+      Tienen en cuenta las restricciones físicas de la sala (Filas J y K para sillas de ruedas).</p>
+      
+      <app-seat-map></app-seat-map>
+      
+      <div class="actions">
+        <button class="btn-secondary" (click)="prevStep()">Volver</button>
+        <button class="btn-primary" (click)="nextStep()">Continuar al Candy Bar</button>
+      </div>
+    }
+
+    @if (currentStep === 3) {
+      <h3>Candy Bar</h3>
+      <p class="subtitle">Agregá combos y snacks a tu pedido para disfrutar al máximo la película.</p>
+      
+      <app-candy-bar></app-candy-bar>
+      
+      <div class="actions">
+        <button class="btn-secondary" (click)="prevStep()">Volver a butacas</button>
+        <button class="btn-primary" (click)="nextStep()">Continuar al Pago</button>
+      </div>
+    }
+
+    @if (currentStep === 4) {
+      <h3>Pago y Emisión de Ticket</h3>
+      
+      <app-payment></app-payment>
+      
+      <div class="actions">
+        <!-- Puedes ocultar o manejar este botón de 'volver' dentro del PaymentComponent si ya se pagó -->
+        <button class="btn-secondary" (click)="prevStep()">Volver al Candy Bar</button>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,80 @@
+<div class="admin-container main-container">
+  <header class="admin-header">
+    <h2>Panel de Administración</h2>
+    <p>Bienvenido. Acá podés ver el rendimiento del cine y configurar las películas.</p>
+  </header>
+
+  <section class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-data">
+        <h4>Ingresos del Mes</h4>
+        <p class="value">{{ ingresosMensuales | currency:'ARS':'symbol-narrow':'1.0-0' }}</p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🎟️</div>
+      <div class="kpi-data">
+        <h4>Entradas Vendidas</h4>
+        <p class="value">{{ entradasVendidas }}</p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🍿</div>
+      <div class="kpi-data">
+        <h4>Combos Vendidos</h4>
+        <p class="value">{{ combosVendidos }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="admin-section">
+    <div class="section-header">
+      <h3>Películas en Cartelera</h3>
+      <button class="btn-primary btn-sm">+ Nueva Película</button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Película</th>
+            <th>Duración</th>
+            <th>Restricción</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (movie of movies; track movie.id) {
+            <tr>
+              <td>
+                <div class="movie-cell">
+                  <img [src]="movie.imagen_url" alt="{{ movie.titulo }}" class="mini-poster">
+                  <span>{{ movie.titulo }}</span>
+                </div>
+              </td>
+              <td>{{ movie.duracion_minutos }} min</td>
+              <td><span class="badge badge-dark">{{ movie.restriccion_edad }}</span></td>
+              <td>
+                <span class="badge" [class.badge-active]="movie.estado === 'cartelera'" [class.badge-warning]="movie.estado === 'proximamente'">
+                  {{ movie.estado | titlecase }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn-icon" title="Editar" (click)="editarPelicula(movie)">✏️</button>
+                  <button class="btn-icon" title="Cambiar Estado" (click)="cambiarEstado(movie)">🔄</button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="text-center">No hay películas cargadas.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

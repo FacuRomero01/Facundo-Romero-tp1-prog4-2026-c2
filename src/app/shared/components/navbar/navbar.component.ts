@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
+import { RouterLink, Router } from '@angular/router';
+import { SupabaseService } from '../../../core/services/supabase.service';
 
 @Component({
   selector: 'app-navbar',
@@ -8,6 +9,20 @@ import { RouterLink } from '@angular/router';
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
+  private supabase = inject(SupabaseService);
+  private router = inject(Router);
 
+  isLoggedIn = false;
+
+  ngOnInit() {
+    this.supabase.auth.onAuthStateChange((event, session) => {
+      this.isLoggedIn = !!session;
+    });
+  }
+
+  async logout() {
+    await this.supabase.signOut();
+    this.router.navigate(['/']);
+  }
 }
