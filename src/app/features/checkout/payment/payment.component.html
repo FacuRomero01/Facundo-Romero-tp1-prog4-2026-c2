@@ -47,8 +47,8 @@
         <span>{{ finalCost() | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
       </div>
 
-      <button class="btn-primary w-100 mt-2" (click)="confirmPayment()" [disabled]="selectedSeats().length === 0">
-        Confirmar Pago
+      <button class="btn-primary w-100 mt-2" (click)="confirmPayment()" [disabled]="selectedSeats().length === 0 || isProcessing">
+        {{ isProcessing ? 'Procesando...' : 'Confirmar Pago' }}
       </button>
     </div>
   } @else {
@@ -69,6 +69,8 @@
           }
         </p>
       </div>
+
+      <button class="btn-primary w-100 mt-2" routerLink="/home">Volver al Inicio</button>
     </div>
   }
 </div>

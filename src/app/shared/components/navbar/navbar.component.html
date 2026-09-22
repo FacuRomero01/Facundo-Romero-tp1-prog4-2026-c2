@@ -1,12 +1,15 @@
 <nav class="navbar">
   <div class="navbar-brand">
-    <a routerLink="/">🎟️ CineStar</a>
+    <a routerLink="/home">🎟️ CineStar</a>
   </div>
   <div class="navbar-menu">
-    <a routerLink="/">Cartelera</a>
-    <a routerLink="/admin">Panel Admin</a>
+    <a routerLink="/home">Cartelera</a>
     
-    @if (isLoggedIn) {
+    @if (isAdmin()) {
+      <a routerLink="/admin">Panel Admin</a>
+    }
+    
+    @if (isLoggedIn()) {
       <a routerLink="/profile">Mi Perfil</a>
       <a href="#" (click)="logout(); $event.preventDefault()">Cerrar Sesión</a>
     } @else {

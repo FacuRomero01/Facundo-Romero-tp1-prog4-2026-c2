@@ -35,6 +35,13 @@ export class SupabaseService {
     });
     if (error) throw error;
     
+    // Forzamos el inicio de sesión explícito si Supabase no nos dio la sesión automática
+    // (a veces pasa por temas de caché o si quedó alguna configuración colgada en Supabase)
+    const { data: sessionData } = await this._supabase.auth.getSession();
+    if (!sessionData.session) {
+       await this._supabase.auth.signInWithPassword({ email, password });
+    }
+
     // Si se creó el usuario en Auth, creamos el perfil en nuestra tabla `perfiles`
     if (data.user) {
       const { error: profileError } = await this._supabase.from('perfiles').insert({

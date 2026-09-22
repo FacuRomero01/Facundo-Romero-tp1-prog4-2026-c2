@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -11,7 +11,7 @@ import { SupabaseService } from '../../../core/services/supabase.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabase = inject(SupabaseService);
   private router = inject(Router);
@@ -24,6 +24,13 @@ export class LoginComponent {
   errorMessage = '';
   loading = false;
 
+  async ngOnInit() {
+    const session = await this.supabase.auth.getSession();
+    if (session?.data?.session) {
+      this.router.navigate(['/home']);
+    }
+  }
+
   async onSubmit() {
     if (this.loginForm.invalid) return;
 
@@ -34,7 +41,7 @@ export class LoginComponent {
 
     try {
       await this.supabase.signIn(email!, password!);
-      this.router.navigate(['/']);
+      this.router.navigate(['/home']);
     } catch (error: any) {
       this.errorMessage = error.message || 'Error al iniciar sesión';
     } finally {

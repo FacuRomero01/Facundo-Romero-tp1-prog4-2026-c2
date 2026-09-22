@@ -21,6 +21,10 @@
       <button type="submit" class="btn-primary w-100" [disabled]="loginForm.invalid || loading">
         {{ loading ? 'Ingresando...' : 'Iniciar Sesión' }}
       </button>
+      
+      <button type="button" class="btn-secondary w-100" style="margin-top: 1rem;" routerLink="/home">
+        Ingresar sin registrarse (Invitado)
+      </button>
     </form>
 
     <div class="auth-links">

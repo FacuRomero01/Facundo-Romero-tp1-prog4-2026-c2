@@ -53,7 +53,7 @@ export class RegisterComponent {
 
       await this.supabase.signUp(email!, password!, profileData);
       alert('¡Registro exitoso! Ya ganaste tu cupón de 20% para tu primera compra.');
-      this.router.navigate(['/']);
+      this.router.navigate(['/home']);
     } catch (error: any) {
       this.errorMessage = error.message || 'Error al registrarse';
     } finally {

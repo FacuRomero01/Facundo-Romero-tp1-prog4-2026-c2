@@ -84,6 +84,45 @@ export class BookingService {
     }
   }
 
+  async reserveSeats(funcionId: string, seatsToReserve: Seat[]) {
+    // Legacy method, not used anymore
+  }
+
+  async createTicket(funcionId: string, seatsToReserve: Seat[], finalPrice: number, userId?: string) {
+    // 1. Insert ticket
+    const qrData = `TICKET-${funcionId}-${Date.now()}`;
+    const { data: ticket, error: ticketError } = await this.supabase.client
+      .from('tickets')
+      .insert({
+        funcion_id: funcionId,
+        usuario_id: userId || null,
+        codigo_qr: qrData,
+        precio_final: finalPrice,
+        estado: 'valido'
+      })
+      .select('id, codigo_qr')
+      .single();
+
+    if (ticketError) throw ticketError;
+
+    // 2. Insert seats linked to ticket
+    if (seatsToReserve.length > 0) {
+      const inserts = seatsToReserve.map(s => ({
+        funcion_id: funcionId,
+        ticket_id: ticket.id,
+        fila: s.row,
+        columna: s.col
+      }));
+      const { error: seatsError } = await this.supabase.client
+        .from('butacas_ocupadas')
+        .insert(inserts);
+        
+      if (seatsError) throw seatsError;
+    }
+
+    return ticket.codigo_qr;
+  }
+
   subscribeToSeatChanges(funcionId: string) {
     this.seatChannel = this.supabase.client.channel(`seats-${funcionId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'butacas_ocupadas', filter: `funcion_id=eq.${funcionId}` }, 

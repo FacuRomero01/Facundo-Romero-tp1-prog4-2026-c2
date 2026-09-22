@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { SupabaseService } from '../../../core/services/supabase.service';
 
@@ -13,16 +13,30 @@ export class NavbarComponent implements OnInit {
   private supabase = inject(SupabaseService);
   private router = inject(Router);
 
-  isLoggedIn = false;
+  isLoggedIn = signal(false);
+  isAdmin = signal(false);
 
-  ngOnInit() {
+  async ngOnInit() {
+    const { data } = await this.supabase.auth.getSession();
+    this.updateState(data.session);
+
     this.supabase.auth.onAuthStateChange((event, session) => {
-      this.isLoggedIn = !!session;
+      this.updateState(session);
     });
+  }
+
+  private async updateState(session: any) {
+    this.isLoggedIn.set(!!session);
+    if (session?.user?.id) {
+      const profile = await this.supabase.getProfile(session.user.id);
+      this.isAdmin.set(profile?.rol === 'admin');
+    } else {
+      this.isAdmin.set(false);
+    }
   }
 
   async logout() {
     await this.supabase.signOut();
-    this.router.navigate(['/']);
+    this.router.navigate(['/login']);
   }
 }
