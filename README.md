@@ -1,3 +1,22 @@
+-------------------
+CUENTAS REGISTRADAS
+-------------------
+
+ADMIN:
+      admin@gmail.com
+      111111
+
+CLIENTE
+      cliente2@gmail.com
+      111111
+
+CLIENTE MENOR DE EDAD
+      cliente10anos@gmail.com
+      111111
+
+-----------------
+
+
 # CineApp
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.5.
