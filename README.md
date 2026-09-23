@@ -2,25 +2,25 @@
 CUENTAS REGISTRADAS
 -------------------
 
-ADMIN:
-      admin@gmail.com
-      111111
+- ADMIN:
+-      admin@gmail.com
+-      111111
 
-CLIENTE
-      cliente2@gmail.com
-      111111
+- CLIENTE:
+-      cliente2@gmail.com
+-      111111
 
-CLIENTE MENOR DE EDAD
-      cliente10anos@gmail.com
-      111111
+CLIENTE MENOR DE EDAD:
+-      cliente10anos@gmail.com
+-      111111
 
 -------------------
 CUPONES REGISTRADOS
 -------------------
 
-BIENVENIDA20 (solo se puede usar en primera compra)
-POLIMARDO50 (cupon general)
-TATITA30 (solo si la cuenta registrada es >50 años)
+- BIENVENIDA20 (solo se puede usar en primera compra).
+- POLIMARDO50 (cupon general).
+- TATITA30 (solo si la cuenta registrada es >50 años).
 
 -------------------
 # CineApp
