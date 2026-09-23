@@ -12,14 +12,8 @@ import { BookingService, Seat } from '../../../core/services/booking.service';
 export class SeatMapComponent implements OnInit, OnDestroy {
   bookingService = inject(BookingService);
   
-  // Hardcodeado para la demo, pero en la realidad viene de la URL (ruta)
-  funcionId = '00000000-0000-0000-0000-000000000000'; 
-  
   ngOnInit() {
     this.bookingService.generateSeatMap();
-    // En un entorno real se haría await:
-    // this.bookingService.loadOccupiedSeats(this.funcionId);
-    // this.bookingService.subscribeToSeatChanges(this.funcionId);
   }
 
   ngOnDestroy() {

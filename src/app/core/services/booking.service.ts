@@ -84,12 +84,8 @@ export class BookingService {
     }
   }
 
-  async reserveSeats(funcionId: string, seatsToReserve: Seat[]) {
-    // Legacy method, not used anymore
-  }
-
   async createTicket(funcionId: string, seatsToReserve: Seat[], finalPrice: number, userId?: string) {
-    // 1. Insert ticket
+    // Inserto el ticket
     const qrData = `TICKET-${funcionId}-${Date.now()}`;
     const { data: ticket, error: ticketError } = await this.supabase.client
       .from('tickets')
@@ -105,7 +101,7 @@ export class BookingService {
 
     if (ticketError) throw ticketError;
 
-    // 2. Insert seats linked to ticket
+    // Inserto los asientos relacionados al ticket
     if (seatsToReserve.length > 0) {
       const inserts = seatsToReserve.map(s => ({
         funcion_id: funcionId,

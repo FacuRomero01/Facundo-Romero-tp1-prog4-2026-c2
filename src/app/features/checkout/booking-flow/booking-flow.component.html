@@ -11,7 +11,7 @@
   <div class="step-content">
     @if (currentStep === 1) {
       <div class="date-time-selection">
-        <h3>Selecciona un Horario (Sin scroll molesto)</h3>
+        <h3>Selecciona un Horario</h3>
         
         <div class="funciones-grid">
           @for (funcion of funciones; track funcion.id) {
@@ -33,8 +33,8 @@
 
     @if (currentStep === 2) {
       <h3>Elige tus butacas</h3>
-      <p class="subtitle">Las butacas se actualizan en tiempo real. 
-      Tienen en cuenta las restricciones físicas de la sala (Filas J y K para sillas de ruedas).</p>
+      <p class="subtitle">Seleccione las butacas que desea comprar.
+      Las butacas se actualizan en tiempo real.</p>
       
       <app-seat-map></app-seat-map>
       
@@ -59,12 +59,13 @@
     @if (currentStep === 4) {
       <h3>Pago y Emisión de Ticket</h3>
       
-      <app-payment></app-payment>
+      <app-payment #paymentRef></app-payment>
       
-      <div class="actions">
-        <!-- Puedes ocultar o manejar este botón de 'volver' dentro del PaymentComponent si ya se pagó -->
-        <button class="btn-secondary" (click)="prevStep()">Volver al Candy Bar</button>
-      </div>
+      @if (!paymentRef.isPaid()) {
+        <div class="actions">
+          <button class="btn-secondary" (click)="prevStep()">Volver al Candy Bar</button>
+        </div>
+      }
     }
   </div>
 </div>

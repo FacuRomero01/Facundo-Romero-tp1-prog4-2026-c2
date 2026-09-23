@@ -31,7 +31,10 @@ export class RegisterComponent {
   loading = false;
 
   async onSubmit() {
-    if (this.registerForm.invalid) return;
+    if (this.registerForm.invalid) {
+      this.errorMessage = 'Faltan completar campos obligatorios, o la contraseña tiene menos de 6 caracteres.';
+      return;
+    }
 
     this.loading = true;
     this.errorMessage = '';
@@ -52,7 +55,11 @@ export class RegisterComponent {
       };
 
       await this.supabase.signUp(email!, password!, profileData);
-      alert('¡Registro exitoso! Ya ganaste tu cupón de 20% para tu primera compra.');
+      
+      const { data: cup } = await this.supabase.client.from('cupones').select('codigo, porcentaje_descuento').eq('tipo_restriccion', 'primera_compra').eq('activo', true).maybeSingle();
+      const cupText = cup ? `\n\nTu código de cupón de bienvenida es: ${cup.codigo} (${cup.porcentaje_descuento}% OFF). ¡Anotalo para tu primera compra!` : '';
+      
+      alert(`¡Registro exitoso!${cupText}`);
       this.router.navigate(['/home']);
     } catch (error: any) {
       this.errorMessage = error.message || 'Error al registrarse';

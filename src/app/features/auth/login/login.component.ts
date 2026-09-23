@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -15,6 +15,7 @@ export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabase = inject(SupabaseService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -36,6 +37,7 @@ export class LoginComponent implements OnInit {
 
     this.loading = true;
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
     const { email, password } = this.loginForm.value;
 
@@ -43,9 +45,14 @@ export class LoginComponent implements OnInit {
       await this.supabase.signIn(email!, password!);
       this.router.navigate(['/home']);
     } catch (error: any) {
-      this.errorMessage = error.message || 'Error al iniciar sesión';
+      if (error.message === 'Invalid login credentials') {
+        this.errorMessage = 'El correo o la contraseña son incorrectos.';
+      } else {
+        this.errorMessage = error.message || 'Error al iniciar sesión';
+      }
     } finally {
       this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 }

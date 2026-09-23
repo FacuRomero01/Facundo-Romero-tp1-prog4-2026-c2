@@ -1,7 +1,13 @@
 <div class="payment-container">
-  @if (!isPaid) {
+  @if (!isPaid()) {
     <div class="summary-card">
       <h3>Resumen de Compra</h3>
+
+      @if (ageError) {
+        <div class="alert alert-danger" style="color: red; margin-bottom: 10px;">
+          <strong>Acceso denegado:</strong> {{ ageError }}
+        </div>
+      }
       
       <div class="summary-section">
         <h4>Entradas</h4>
@@ -35,19 +41,29 @@
         <span>{{ totalCost() | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
       </div>
 
-      <div class="credits-section">
-        <label>
-          <input type="checkbox" [checked]="useCredits" (change)="toggleCredits()">
-          Usar saldo a favor ({{ userCredits | currency:'ARS':'symbol-narrow':'1.0-0' }})
-        </label>
-      </div>
+      @if (userProfile) {
+        <div class="discount-section" style="margin-top: 15px; background: #eee; padding: 10px; border-radius: 5px;">
+          <h4>Descuentos y Beneficios</h4>
+          <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <input type="text" [(ngModel)]="couponCode" placeholder="Código de cupón">
+            <button class="btn-secondary" (click)="applyCoupon()">Aplicar</button>
+          </div>
+          @if (couponError) { <p style="color: red; margin: 0;">{{ couponError }}</p> }
+          @if (discountPercent() > 0) { <p style="color: green; margin: 0;">Cupón aplicado: -{{ discountPercent() }}%</p> }
 
-      <div class="summary-row final-total">
+          <label style="display: block; margin-top: 10px;">
+            <input type="checkbox" [checked]="useCredits()" (change)="toggleCredits()">
+            Usar saldo a favor ({{ userCredits | currency:'ARS':'symbol-narrow':'1.0-0' }})
+          </label>
+        </div>
+      }
+
+      <div class="summary-row final-total" style="font-size: 1.2rem; font-weight: bold; margin-top: 15px;">
         <span>Total a Pagar</span>
         <span>{{ finalCost() | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
       </div>
 
-      <button class="btn-primary w-100 mt-2" (click)="confirmPayment()" [disabled]="selectedSeats().length === 0 || isProcessing">
+      <button class="btn-primary w-100 mt-2" (click)="confirmPayment()" [disabled]="selectedSeats().length === 0 || isProcessing || ageError !== ''">
         {{ isProcessing ? 'Procesando...' : 'Confirmar Pago' }}
       </button>
     </div>
