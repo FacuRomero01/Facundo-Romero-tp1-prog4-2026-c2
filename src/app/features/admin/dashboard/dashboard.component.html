@@ -31,7 +31,7 @@
   <section class="admin-section">
     <div class="section-header">
       <h3>Películas en Cartelera</h3>
-      <button class="btn-primary btn-sm">+ Nueva Película</button>
+      <button class="btn-primary btn-sm" (click)="abrirFormulario()">+ Nueva Película</button>
     </div>
 
     <div class="table-responsive">
@@ -78,3 +78,72 @@
     </div>
   </section>
 </div>
+
+@if (showMovieForm) {
+  <div class="modal-overlay" (click)="cerrarFormulario()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ newMovie.id ? 'Editar Película' : 'Nueva Película' }}</h3>
+        <button class="close-btn" (click)="cerrarFormulario()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="guardarPelicula()" #movieForm="ngForm">
+          <div class="form-group">
+            <label>Título</label>
+            <input type="text" [(ngModel)]="newMovie.titulo" name="titulo" required>
+          </div>
+          <div class="form-group">
+            <label>Sinopsis</label>
+            <textarea [(ngModel)]="newMovie.sinopsis" name="sinopsis" rows="3"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Duración (min)</label>
+              <input type="number" [(ngModel)]="newMovie.duracion_minutos" name="duracion" required min="1">
+            </div>
+            <div class="form-group">
+              <label>Estreno</label>
+              <input type="date" [(ngModel)]="newMovie.fecha_estreno" name="fecha" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Restricción</label>
+              <select [(ngModel)]="newMovie.restriccion_edad" name="restriccion">
+                <option value="ATP">ATP</option>
+                <option value="+13">+13</option>
+                <option value="+16">+16</option>
+                <option value="+18">+18</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Estado</label>
+              <select [(ngModel)]="newMovie.estado" name="estado">
+                <option value="cartelera">En Cartelera</option>
+                <option value="proximamente">Próximamente</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Géneros (Múltiple)</label>
+            <select multiple [(ngModel)]="newMovie.genero_ids" name="generos" class="multi-select" style="height: 100px;">
+              @for (g of generosDisponibles; track g.id) {
+                <option [value]="g.id">{{ g.nombre }}</option>
+              }
+            </select>
+            <small style="color: #888; margin-top: 4px; font-size: 0.8rem;">Mantené presionado Ctrl o Cmd para seleccionar varios.</small>
+          </div>
+          <div class="form-group">
+            <label>URL Imagen Poster</label>
+            <input type="url" [(ngModel)]="newMovie.imagen_url" name="imagen">
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" (click)="cerrarFormulario()">Cancelar</button>
+            <button type="submit" class="btn-primary" [disabled]="!movieForm.form.valid">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}

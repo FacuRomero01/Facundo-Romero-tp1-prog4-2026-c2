@@ -82,9 +82,16 @@
     color: white;
   }
 
+  &.aisle-right {
+    margin-right: 30px; /* Espaciado 4-20-4 */
+  }
+
   /* Tipos Especiales */
-  &.vip {
-    border-bottom: 3px solid gold;
+  &.vip.available {
+    background-color: #ffd700; /* amarillo */
+  }
+  &.vip.occupied {
+    background-color: #b89600;
   }
   &.accessible {
     background-color: #007bff;

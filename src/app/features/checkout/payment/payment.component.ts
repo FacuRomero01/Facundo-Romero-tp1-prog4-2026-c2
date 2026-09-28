@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
 import { SupabaseService } from '../../../core/services/supabase.service';
+import { SpanishDatePipe } from '../../../shared/pipes/spanish-date.pipe';
 
 @Component({
   selector: 'app-payment',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, SpanishDatePipe],
   templateUrl: './payment.component.html',
   styleUrl: './payment.component.scss'
 })

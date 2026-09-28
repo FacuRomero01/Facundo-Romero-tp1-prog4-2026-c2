@@ -6,11 +6,12 @@ import { CandyBarComponent } from '../candy-bar/candy-bar.component';
 import { PaymentComponent } from '../payment/payment.component';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { BookingService } from '../../../core/services/booking.service';
+import { SpanishDatePipe } from '../../../shared/pipes/spanish-date.pipe';
 
 @Component({
   selector: 'app-booking-flow',
   standalone: true,
-  imports: [CommonModule, SeatMapComponent, CandyBarComponent, PaymentComponent],
+  imports: [CommonModule, SeatMapComponent, CandyBarComponent, PaymentComponent, SpanishDatePipe],
   templateUrl: './booking-flow.component.html',
   styleUrl: './booking-flow.component.scss'
 })

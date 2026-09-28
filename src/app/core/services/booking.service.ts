@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, NgZone } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -25,6 +25,7 @@ export interface CandyItem {
 })
 export class BookingService {
   private supabase = inject(SupabaseService);
+  private ngZone = inject(NgZone);
   private seatChannel!: RealtimeChannel;
   
   // Usamos signals para que Angular actualice la vista de las butacas automáticamente
@@ -45,29 +46,16 @@ export class BookingService {
       const mult = isVip ? 1.5 : 1.0;
       
       for (let c = 1; c <= 28; c++) {
-        // Regla Discapacidad en filas J y K (espacio central vacío, "2, 10 y 2")
-        // Digamos columnas: 1-4 (normal), 5-24 (espacio central, 10 asientos por lado, etc)
-        // Para simplificar: Las filas J y K no tienen butacas de la col 5 a la 24.
-        let isAccessible = false;
-        let isSpace = false;
-        if (r === 'J' || r === 'K') {
-          if (c > 4 && c < 25) {
-            isSpace = true; // Espacio central vacío para sillas de ruedas
-          } else {
-            isAccessible = true; // Las butacas restantes en J y K son accesibles
-          }
-        }
+        let isAccessible = (r === 'J');
         
-        if (!isSpace) {
-          newSeats.push({
-            id: `${r}-${c}`,
-            row: r,
-            col: c,
-            status: 'available',
-            type: isAccessible ? 'accessible' : (isVip ? 'vip' : 'regular'),
-            priceMultiplier: mult
-          });
-        }
+        newSeats.push({
+          id: `${r}-${c}`,
+          row: r,
+          col: c,
+          status: 'available',
+          type: isAccessible ? 'accessible' : (isVip ? 'vip' : 'regular'),
+          priceMultiplier: mult
+        });
       }
     }
     this.seats.set(newSeats);
@@ -116,6 +104,23 @@ export class BookingService {
       if (seatsError) throw seatsError;
     }
 
+    // Inserto el candy asociado al ticket
+    const candy = this.candyItems().filter(c => c.quantity > 0);
+    if (candy.length > 0) {
+      const candyInserts = candy.map(c => ({
+        ticket_id: ticket.id,
+        producto_id: c.id,
+        cantidad: c.quantity
+      }));
+      try {
+        const { error: candyError } = await this.supabase.client
+          .from('ticket_candy')
+          .insert(candyInserts);
+      } catch (err) {
+        console.warn('Error al intentar guardar el Candy Bar:', err);
+      }
+    }
+
     return ticket.codigo_qr;
   }
 
@@ -123,11 +128,13 @@ export class BookingService {
     this.seatChannel = this.supabase.client.channel(`seats-${funcionId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'butacas_ocupadas', filter: `funcion_id=eq.${funcionId}` }, 
       (payload: any) => {
-        if (payload.eventType === 'INSERT') {
-          this.updateSeat(payload.new.fila, payload.new.columna, 'occupied');
-        } else if (payload.eventType === 'DELETE') {
-          this.updateSeat(payload.old.fila, payload.old.columna, 'available');
-        }
+        this.ngZone.run(() => {
+          if (payload.eventType === 'INSERT') {
+            this.updateSeat(payload.new.fila, payload.new.columna, 'occupied');
+          } else if (payload.eventType === 'DELETE') {
+            this.updateSeat(payload.old.fila, payload.old.columna, 'available');
+          }
+        });
       }).subscribe();
   }
   
@@ -142,7 +149,7 @@ export class BookingService {
     occupied.forEach(o => {
       const idx = current.findIndex(s => s.row === o.fila && s.col === o.columna);
       if (idx !== -1) {
-         current[idx].status = status;
+         current[idx] = { ...current[idx], status };
       }
     });
     this.seats.set(current);
@@ -152,8 +159,23 @@ export class BookingService {
     const current = [...this.seats()];
     const idx = current.findIndex(s => s.row === row && s.col === col);
     if (idx !== -1) {
-       current[idx].status = status;
+       current[idx] = { ...current[idx], status };
        this.seats.set(current);
+    }
+  }
+
+  async loadCandyItems() {
+    const { data } = await this.supabase.client.from('candy_productos').select('*');
+    if (data && data.length > 0) {
+      const items = data.map(d => ({
+        id: d.id,
+        name: d.nombre || 'Producto',
+        description: d.categoria || (d.es_combo ? 'Combo' : 'Snack'),
+        price: d.precio || 0,
+        imageUrl: d.imagen_url || d.icono || '🍿',
+        quantity: 0
+      }));
+      this.candyItems.set(items);
     }
   }
 }

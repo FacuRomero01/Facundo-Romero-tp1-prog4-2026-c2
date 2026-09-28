@@ -14,6 +14,7 @@
             @if (seat.row === row) {
               <div 
                 class="seat" 
+                [class.aisle-right]="seat.col === 4 || seat.col === 24"
                 [ngClass]="[seat.status, seat.type]"
                 (click)="toggleSeat(seat)"
                 [title]="'Fila ' + seat.row + ' Columna ' + seat.col + ' - ' + (seat.type === 'vip' ? 'VIP ($$$)' : (seat.type === 'accessible' ? 'Accesible' : 'Estándar'))">
@@ -30,7 +31,7 @@
     <div class="legend-item"><div class="seat available"></div> Disponible</div>
     <div class="legend-item"><div class="seat occupied"></div> Ocupada</div>
     <div class="legend-item"><div class="seat selected"></div> Tu selección</div>
-    <div class="legend-item"><div class="seat vip"></div> VIP (Filas R, S, T)</div>
-    <div class="legend-item"><div class="seat accessible"></div> Accesible (Filas J, K)</div>
+    <div class="legend-item"><div class="seat vip available"></div> VIP (Filas R, S, T)</div>
+    <div class="legend-item"><div class="seat accessible"></div> Accesible (Fila J)</div>
   </div>
 </div>

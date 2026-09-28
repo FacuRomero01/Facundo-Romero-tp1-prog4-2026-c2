@@ -16,8 +16,8 @@
         <div class="funciones-grid">
           @for (funcion of funciones; track funcion.id) {
             <div class="funcion-card" (click)="seleccionarFuncion(funcion)">
-              <div class="date">{{ funcion.fecha_hora | date:'EEE d MMM' }}</div>
-              <div class="time">{{ funcion.fecha_hora | date:'shortTime' }}</div>
+              <div class="date">{{ funcion.fecha_hora | spanishDate:'date' }}</div>
+              <div class="time">{{ funcion.fecha_hora | spanishDate:'time' }}</div>
               <div class="details">
                 <span class="badge">{{ funcion.formato }}</span>
                 <span class="badge">{{ funcion.idioma }}</span>

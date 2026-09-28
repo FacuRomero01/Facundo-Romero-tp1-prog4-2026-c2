@@ -35,8 +35,7 @@ export class SupabaseService {
     });
     if (error) throw error;
     
-    // Forzamos el inicio de sesión explícito si Supabase no nos dio la sesión automática
-    // (a veces pasa por temas de caché o si quedó alguna configuración colgada en Supabase)
+    // Fuerzo el inicio de sesión explícito si Supabase no nos dio la sesión automática
     const { data: sessionData } = await this._supabase.auth.getSession();
     if (!sessionData.session) {
        await this._supabase.auth.signInWithPassword({ email, password });
@@ -60,7 +59,6 @@ export class SupabaseService {
     if (error) throw error;
   }
 
-  // --- MOVIES ---
   async getMovies(): Promise<Movie[]> {
     const { data, error } = await this._supabase
       .from('peliculas')
@@ -81,20 +79,55 @@ export class SupabaseService {
   }
 
   async getTopSellingMovies(): Promise<Movie[]> {
-    // Aquí implementaremos la lógica del top 3 de ventas
-    const { data, error } = await this._supabase
+    // 1. Obtener todas las butacas vendidas y su pelicula_id
+    const { data: butacas, error: butacasError } = await this._supabase
+      .from('butacas_ocupadas')
+      .select('funciones(pelicula_id)');
+
+    if (butacasError) throw butacasError;
+
+    // 2. Contar ventas por pelicula_id
+    const conteoVentas: { [peliculaId: string]: number } = {};
+    butacas?.forEach((b: any) => {
+      const pId = b.funciones?.pelicula_id;
+      if (pId) {
+        conteoVentas[pId] = (conteoVentas[pId] || 0) + 1;
+      }
+    });
+
+    // 3. Ordenar y sacar los top 3 pelicula_id
+    const top3Ids = Object.entries(conteoVentas)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(entry => entry[0]);
+
+    if (top3Ids.length === 0) {
+      // Si no hay ventas, devolver 3 peliculas por defecto
+      const { data, error } = await this._supabase.from('peliculas').select('*').limit(3);
+      if (error) throw error;
+      return data || [];
+    }
+
+    // 4. Obtener los datos completos de esas películas
+    const { data: peliculas, error: peliError } = await this._supabase
       .from('peliculas')
       .select('*')
-      .limit(3);
-      
-    if (error) throw error;
-    return data || [];
+      .in('id', top3Ids);
+
+    if (peliError) throw peliError;
+
+    // 5. Mantener el orden de más vendida a menos vendida
+    const peliculasOrdenadas = top3Ids
+      .map(id => peliculas?.find(p => p.id === id))
+      .filter(p => !!p) as Movie[];
+    
+    return peliculasOrdenadas;
   }
 
   async getFunciones(peliculaId: string): Promise<any[]> {
     const { data, error } = await this._supabase
       .from('funciones')
-      .select('*, salas(nombre)')
+      .select('*, salas(nombre), peliculas(titulo)')
       .eq('pelicula_id', peliculaId)
       .order('fecha_hora', { ascending: true });
       
@@ -102,7 +135,6 @@ export class SupabaseService {
     return data || [];
   }
 
-  // --- USER PROFILES ---
   async getProfile(userId: string): Promise<UserProfile | null> {
     const { data, error } = await this._supabase
       .from('perfiles')
