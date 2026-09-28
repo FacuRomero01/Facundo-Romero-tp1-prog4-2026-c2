@@ -1,69 +1,104 @@
 <div class="booking-container main-container">
-  <h2>Proceso de Compra</h2>
   
-  <div class="stepper">
-    <div class="step" [class.active]="currentStep >= 1">1. Función</div>
-    <div class="step" [class.active]="currentStep >= 2">2. Butacas</div>
-    <div class="step" [class.active]="currentStep >= 3">3. Candy Bar</div>
-    <div class="step" [class.active]="currentStep >= 4">4. Pago</div>
+  <div class="booking-header">
+    <h2 class="section-title text-center" style="justify-content: center; margin-bottom: 20px;">
+      <span class="neon-line"></span> Compra de Entradas <span class="neon-line"></span>
+    </h2>
+    
+    <div class="stepper">
+      <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+        <div class="step-circle">1</div>
+        <span class="step-label">Función</span>
+      </div>
+      <div class="stepper-line" [class.active]="currentStep >= 2"></div>
+      
+      <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+        <div class="step-circle">2</div>
+        <span class="step-label">Asientos</span>
+      </div>
+      <div class="stepper-line" [class.active]="currentStep >= 3"></div>
+      
+      <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+        <div class="step-circle">3</div>
+        <span class="step-label">Candy Bar</span>
+      </div>
+      <div class="stepper-line" [class.active]="currentStep >= 4"></div>
+      
+      <div class="step" [class.active]="currentStep >= 4">
+        <div class="step-circle">4</div>
+        <span class="step-label">Pago</span>
+      </div>
+    </div>
   </div>
 
-  <div class="step-content">
+  <div class="step-content neon-card">
     @if (currentStep === 1) {
       <div class="date-time-selection">
-        <h3>Selecciona un Horario</h3>
+        <h3 class="text-center" style="margin-bottom: 30px;">Seleccioná el horario</h3>
         
         <div class="funciones-grid">
           @for (funcion of funciones; track funcion.id) {
             <div class="funcion-card" (click)="seleccionarFuncion(funcion)">
-              <div class="date">{{ funcion.fecha_hora | spanishDate:'date' }}</div>
-              <div class="time">{{ funcion.fecha_hora | spanishDate:'time' }}</div>
-              <div class="details">
-                <span class="badge">{{ funcion.formato }}</span>
-                <span class="badge">{{ funcion.idioma }}</span>
+              <div class="funcion-date">
+                <span class="day">{{ funcion.fecha_hora | spanishDate:'date' }}</span>
+                <span class="time">{{ funcion.fecha_hora | spanishDate:'time' }}</span>
               </div>
-              <div class="room">{{ funcion.salas?.nombre }}</div>
+              <div class="funcion-details">
+                <span class="badge badge-primary">{{ funcion.formato }}</span>
+                <span class="badge badge-outline">{{ funcion.idioma }}</span>
+              </div>
+              <div class="funcion-room">
+                <i class="icon-screen"></i> {{ funcion.salas?.nombre }}
+              </div>
             </div>
           } @empty {
-            <p>No hay funciones programadas para esta película.</p>
+            <div class="empty-state text-center" style="grid-column: 1 / -1; padding: 40px;">
+              <p class="text-muted">No hay funciones programadas para esta película.</p>
+            </div>
           }
         </div>
       </div>
     }
 
     @if (currentStep === 2) {
-      <h3>Elige tus butacas</h3>
-      <p class="subtitle">Seleccione las butacas que desea comprar.
-      Las butacas se actualizan en tiempo real.</p>
+      <div class="text-center" style="margin-bottom: 30px;">
+        <h3>Elige tus butacas</h3>
+        <p class="text-muted">La sala se actualiza en tiempo real.</p>
+      </div>
       
       <app-seat-map></app-seat-map>
       
-      <div class="actions">
-        <button class="btn-secondary" (click)="prevStep()">Volver</button>
-        <button class="btn-primary" (click)="nextStep()">Continuar al Candy Bar</button>
+      <div class="step-actions flex-between" style="margin-top: 40px; border-top: var(--border-subtle); padding-top: 20px;">
+        <button class="btn btn-secondary" (click)="prevStep()">Volver</button>
+        <button class="btn btn-primary" (click)="nextStep()">Continuar al Candy Bar</button>
       </div>
     }
 
     @if (currentStep === 3) {
-      <h3>Candy Bar</h3>
-      <p class="subtitle">Agregá combos y snacks a tu pedido para disfrutar al máximo la película.</p>
+      <div class="text-center" style="margin-bottom: 30px;">
+        <h3>Candy Bar</h3>
+        <p class="text-muted">Agregá snacks y bebidas a tu carrito.</p>
+      </div>
       
       <app-candy-bar></app-candy-bar>
       
-      <div class="actions">
-        <button class="btn-secondary" (click)="prevStep()">Volver a butacas</button>
-        <button class="btn-primary" (click)="nextStep()">Continuar al Pago</button>
+      <div class="step-actions flex-between" style="margin-top: 40px; border-top: var(--border-subtle); padding-top: 20px;">
+        <button class="btn btn-secondary" (click)="prevStep()">Volver a butacas</button>
+        <button class="btn btn-primary" (click)="nextStep()">Continuar al Pago</button>
       </div>
     }
 
     @if (currentStep === 4) {
-      <h3>Pago y Emisión de Ticket</h3>
+      <div class="text-center" style="margin-bottom: 30px;">
+        <h3>Pago y Emisión</h3>
+        <p class="text-muted">Confirmá tu orden para generar el Ticket.</p>
+      </div>
       
       <app-payment #paymentRef></app-payment>
       
       @if (!paymentRef.isPaid()) {
-        <div class="actions">
-          <button class="btn-secondary" (click)="prevStep()">Volver al Candy Bar</button>
+        <div class="step-actions flex-between" style="margin-top: 40px; border-top: var(--border-subtle); padding-top: 20px;">
+          <button class="btn btn-secondary" (click)="prevStep()">Volver al Candy Bar</button>
         </div>
       }
     }

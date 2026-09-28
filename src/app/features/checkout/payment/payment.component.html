@@ -1,109 +1,135 @@
 <div class="payment-container">
   @if (!isPaid()) {
     <div class="summary-card">
-      <h3>Resumen de Compra</h3>
+      <div class="summary-header">
+        <i class="icon-receipt"></i>
+        <h3>Resumen de Compra</h3>
+      </div>
 
       @if (ageError) {
-        <div class="alert alert-danger" style="color: red; margin-bottom: 10px;">
+        <div class="alert alert-error">
           <strong>Acceso denegado:</strong> {{ ageError }}
         </div>
       }
       
       <div class="summary-section">
-        <h4>Entradas</h4>
-        @for (seat of selectedSeats(); track seat.id) {
+        <h4 class="section-subtitle">Entradas</h4>
+        @for (asiento of selectedSeats(); track asiento.id) {
           <div class="summary-row">
-            <span>Butaca {{ seat.id }} ({{ seat.type }})</span>
-            <span>{{ basePrice * seat.priceMultiplier | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+            <span class="item-name">Butaca {{ asiento.id }} <span class="badge badge-outline">{{ asiento.type }}</span></span>
+            <span class="item-price">{{ basePrice * asiento.priceMultiplier | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
           </div>
         }
         @empty {
-          <p class="empty-text">No seleccionaste butacas.</p>
+          <p class="empty-text text-muted">No seleccionaste butacas.</p>
         }
       </div>
 
-      <div class="summary-section">
-        <h4>Candy Bar</h4>
-        @for (item of bookingService.candyItems(); track item.id) {
-          @if (item.quantity > 0) {
-            <div class="summary-row">
-              <span>{{ item.quantity }}x {{ item.name }}</span>
-              <span>{{ item.price * item.quantity | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
-            </div>
+      @if (candyCost() > 0) {
+        <div class="summary-section">
+          <h4 class="section-subtitle">Candy Bar</h4>
+          @for (productoCandy of bookingService.candyItems(); track productoCandy.id) {
+            @if (productoCandy.quantity > 0) {
+              <div class="summary-row">
+                <span class="item-name"><span class="qty-badge">{{ productoCandy.quantity }}x</span> {{ productoCandy.name }}</span>
+                <span class="item-price">{{ productoCandy.price * productoCandy.quantity | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
           }
-        }
-      </div>
+        </div>
+      }
 
-      <hr>
+      <div class="summary-divider"></div>
 
-      <div class="summary-row total">
+      <div class="summary-row subtotal">
         <span>Subtotal</span>
         <span>{{ totalCost() | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
       </div>
 
       @if (userProfile) {
-        <div class="discount-section" style="margin-top: 15px; background: #eee; padding: 10px; border-radius: 5px;">
-          <h4>Descuentos y Beneficios</h4>
-          <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <input type="text" [(ngModel)]="couponCode" placeholder="Código de cupón">
-            <button class="btn-secondary" (click)="applyCoupon()">Aplicar</button>
+        <div class="discount-section">
+          <h4 class="section-subtitle"><i class="icon-star"></i> Beneficios CineStar</h4>
+          
+          <div class="coupon-box">
+            <input type="text" [(ngModel)]="couponCode" class="form-control" placeholder="Ingresá tu código">
+            <button class="btn btn-secondary" (click)="applyCoupon()">Aplicar</button>
           </div>
-          @if (couponError) { <p style="color: red; margin: 0;">{{ couponError }}</p> }
-          @if (discountPercent() > 0) { <p style="color: green; margin: 0;">Cupón aplicado: -{{ discountPercent() }}%</p> }
+          
+          @if (couponError) { <p class="text-error mt-1">{{ couponError }}</p> }
+          @if (discountPercent() > 0) { <p class="text-success mt-1">¡Cupón aplicado! (-{{ discountPercent() }}%)</p> }
 
-          <label style="display: block; margin-top: 10px;">
+          <label class="credit-toggle">
             <input type="checkbox" [checked]="useCredits()" (change)="toggleCredits()">
-            Usar saldo a favor ({{ userCredits | currency:'ARS':'symbol-narrow':'1.0-0' }})
+            <span class="toggle-text">Usar saldo a favor</span>
+            <span class="credit-amount">{{ userCredits | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
           </label>
         </div>
       }
 
-      <div class="summary-row final-total" style="font-size: 1.2rem; font-weight: bold; margin-top: 15px;">
+      <div class="summary-row final-total">
         <span>Total a Pagar</span>
-        <span>{{ finalCost() | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+        <span class="glow-primary-text">{{ finalCost() | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
       </div>
 
-      <button class="btn-primary w-100 mt-2" (click)="confirmPayment()" [disabled]="selectedSeats().length === 0 || isProcessing || ageError !== ''">
+      <button class="btn btn-primary w-100" style="margin-top: 30px; font-size: 1.1rem; padding: 15px;" (click)="confirmPayment()" [disabled]="selectedSeats().length === 0 || isProcessing || ageError !== ''">
         {{ isProcessing ? 'Procesando...' : 'Confirmar Pago' }}
       </button>
     </div>
   } @else {
-    <div class="ticket-card text-center">
-      <h3>¡Reserva Confirmada!</h3>
-      <p>Presentá este código QR en el ingreso de la sala.</p>
-      
-      <div class="qr-container">
-        <img [src]="qrCodeUrl" alt="Código QR de la Entrada">
+    <div class="ticket-card neon-card text-center">
+      <div class="ticket-header">
+        <h3 class="glow-text">¡Reserva Confirmada!</h3>
+        <p class="text-muted">Presentá este código QR en el ingreso de la sala.</p>
       </div>
       
-      <div class="ticket-details" style="text-align: left; max-width: 400px; margin: 0 auto;">
-        <p><strong>Película:</strong> {{ bookingService.selectedFuncion()?.peliculas?.titulo }}</p>
-        <p><strong>Función:</strong> {{ bookingService.selectedFuncion()?.fecha_hora | spanishDate:'short' }}</p>
-        <p><strong>Sala:</strong> {{ bookingService.selectedFuncion()?.salas?.nombre }}</p>
-        <p><strong>Butacas:</strong> 
-          @for (seat of selectedSeats(); track seat.id; let last = $last) {
-            {{ seat.id }}{{ !last ? ', ' : '' }}
-          }
-          ({{ ticketsCost() | currency:'ARS':'symbol-narrow':'1.0-0' }})
-        </p>
+      <div class="qr-container">
+        <div class="qr-frame">
+          <img [src]="qrCodeUrl" alt="Código QR de la Entrada">
+        </div>
+      </div>
+      
+      <div class="ticket-details">
+        <div class="detail-row">
+          <span class="detail-label">Película</span>
+          <span class="detail-value text-accent">{{ bookingService.selectedFuncion()?.peliculas?.titulo }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Función</span>
+          <span class="detail-value">{{ bookingService.selectedFuncion()?.fecha_hora | spanishDate:'short' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Sala</span>
+          <span class="detail-value">{{ bookingService.selectedFuncion()?.salas?.nombre }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Butacas</span>
+          <span class="detail-value">
+            @for (asiento of selectedSeats(); track asiento.id; let last = $last) {
+              <span class="seat-badge">{{ asiento.id }}</span>
+            }
+          </span>
+        </div>
 
         @if (candyCost() > 0) {
-          <div class="candy-details">
-            <p><strong>Candy Bar:</strong></p>
-            <ul style="margin-top: 0; padding-left: 20px;">
-              @for (item of bookingService.candyItems(); track item.id) {
-                @if (item.quantity > 0) {
-                  <li>{{ item.quantity }}x {{ item.name }} ({{ item.price * item.quantity | currency:'ARS':'symbol-narrow':'1.0-0' }})</li>
+          <div class="detail-row candy-row">
+            <span class="detail-label">Candy Bar</span>
+            <div class="detail-value">
+              @for (productoCandy of bookingService.candyItems(); track productoCandy.id) {
+                @if (productoCandy.quantity > 0) {
+                  <div class="candy-item-ticket">{{ productoCandy.quantity }}x {{ productoCandy.name }}</div>
                 }
               }
-            </ul>
+            </div>
           </div>
         }
 
-        <p style="margin-top: 15px; font-size: 1.2rem; text-align: center;"><strong>Total Pagado:</strong> {{ finalCost() | currency:'ARS':'symbol-narrow':'1.0-0' }}</p>
+        <div class="ticket-total">
+          <span>Total Abonado</span>
+          <span class="text-primary">{{ finalCost() | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+        </div>
       </div>
 
-      <button class="btn-primary w-100 mt-2" routerLink="/home">Volver al Inicio</button>
+      <button class="btn btn-secondary w-100 mt-2" routerLink="/home" style="margin-top: 30px;">Volver al Inicio</button>
     </div>
   }
 </div>

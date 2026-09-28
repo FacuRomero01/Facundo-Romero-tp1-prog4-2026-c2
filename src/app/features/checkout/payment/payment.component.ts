@@ -19,9 +19,9 @@ export class PaymentComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   basePrice = 4500;
-  selectedSeats = computed(() => this.bookingService.seats().filter(s => s.status === 'selected'));
-  ticketsCost = computed(() => this.selectedSeats().reduce((total, seat) => total + (this.basePrice * seat.priceMultiplier), 0));
-  candyCost = computed(() => this.bookingService.candyItems().reduce((total, item) => total + (item.price * item.quantity), 0));
+  selectedSeats = computed(() => this.bookingService.seats().filter(asiento => asiento.status === 'selected'));
+  ticketsCost = computed(() => this.selectedSeats().reduce((total, asiento) => total + (this.basePrice * asiento.priceMultiplier), 0));
+  candyCost = computed(() => this.bookingService.candyItems().reduce((total, productoCandy) => total + (productoCandy.price * productoCandy.quantity), 0));
   totalCost = computed(() => this.ticketsCost() + this.candyCost());
 
   userProfile: any = null;
@@ -76,7 +76,7 @@ export class PaymentComponent implements OnInit {
     this.discountPercent.set(0);
     if (!this.couponCode) return;
 
-    const { data: cup, error } = await this.supabase.client
+    const { data: cupon, error } = await this.supabase.client
       .from('cupones')
       .select('*')
       .eq('codigo', this.couponCode.trim().toUpperCase())
@@ -87,13 +87,13 @@ export class PaymentComponent implements OnInit {
       console.error('Error fetching coupon:', error);
     }
 
-    if (!cup) { 
+    if (!cupon) { 
       this.couponError = 'Cupón inválido'; 
       this.cdr.detectChanges();
       return; 
     }
 
-    if (cup.tipo_restriccion === 'mayores_50') {
+    if (cupon.tipo_restriccion === 'mayores_50') {
       const age = Math.floor((new Date().getTime() - new Date(this.userProfile?.fecha_nacimiento).getTime()) / 3.15576e+10);
       if (!age || age < 50) { 
         this.couponError = 'Solo para mayores de 50 años'; 
@@ -102,7 +102,7 @@ export class PaymentComponent implements OnInit {
       }
     }
     
-    if (cup.tipo_restriccion === 'primera_compra') {
+    if (cupon.tipo_restriccion === 'primera_compra') {
       const { count } = await this.supabase.client.from('tickets').select('*', { count: 'exact', head: true }).eq('usuario_id', this.userProfile.id);
       if (count && count > 0) { 
         this.couponError = 'Solo para la primera compra'; 
@@ -111,7 +111,7 @@ export class PaymentComponent implements OnInit {
       }
     }
 
-    this.discountPercent.set(cup.porcentaje_descuento);
+    this.discountPercent.set(cupon.porcentaje_descuento);
     this.cdr.detectChanges(); // <-- Ponytail fix: Forzar update de la vista
   }
 

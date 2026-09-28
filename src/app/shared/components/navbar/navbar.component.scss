@@ -2,29 +2,118 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--surface-color);
+  background-color: rgba(6, 5, 10, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   padding: 15px 40px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(212, 0, 255, 0.15);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 
   .navbar-brand a {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--primary-color);
-    text-decoration: none;
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--color-text);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    span.neon {
+      color: var(--color-primary);
+      text-shadow: var(--glow-primary);
+    }
+
+    &:hover {
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    }
   }
 
   .navbar-menu {
     display: flex;
-    gap: 20px;
+    align-items: center;
+    gap: 30px;
 
     a {
-      color: var(--text-color);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s;
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      color: var(--color-text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      padding: 5px 0;
 
-      &:hover {
-        color: var(--primary-color);
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0%;
+        height: 2px;
+        background-color: var(--color-primary);
+        box-shadow: var(--glow-primary);
+        transition: width var(--transition-fast);
+      }
+
+      &:hover, &.active {
+        color: var(--color-text);
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+        
+        &::after {
+          width: 100%;
+        }
+      }
+    }
+
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-left: 20px;
+      padding-left: 20px;
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      
+      .btn-logout {
+        background: transparent;
+        color: var(--color-text-muted);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        font-size: 0.85rem;
+        
+        &:hover {
+          color: var(--color-error);
+          border-color: var(--color-error);
+          box-shadow: 0 0 10px rgba(255, 23, 68, 0.3);
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 15px 20px;
+    
+    .navbar-brand a {
+      font-size: 1.4rem;
+    }
+    
+    .navbar-menu {
+      gap: 15px;
+      
+      a {
+        font-size: 0.85rem;
+      }
+      
+      .user-actions {
+        margin-left: 10px;
+        padding-left: 10px;
       }
     }
   }

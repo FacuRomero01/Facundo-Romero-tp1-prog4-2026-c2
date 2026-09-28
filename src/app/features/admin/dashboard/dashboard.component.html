@@ -1,40 +1,50 @@
 <div class="admin-container main-container">
   <header class="admin-header">
-    <h2>Panel de Administración</h2>
-    <p>Bienvenido. Acá podés ver el rendimiento del cine y configurar las películas.</p>
+    <h2 class="section-title">
+      <span class="neon-line"></span> Panel de Gestión
+    </h2>
+    <p class="text-muted">Bienvenido. Acá podés ver el rendimiento del cine y configurar la cartelera.</p>
   </header>
 
   <section class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-icon">💰</div>
+    <div class="kpi-card neon-card">
+      <div class="kpi-icon-wrapper success">
+        <i class="icon-revenue">💰</i>
+      </div>
       <div class="kpi-data">
         <h4>Ingresos del Mes</h4>
-        <p class="value">{{ ingresosMensuales | currency:'ARS':'symbol-narrow':'1.0-0' }}</p>
+        <p class="value glow-text">{{ ingresosMensuales | currency:'ARS':'symbol-narrow':'1.0-0' }}</p>
       </div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-icon">🎟️</div>
+    
+    <div class="kpi-card neon-card">
+      <div class="kpi-icon-wrapper primary">
+        <i class="icon-ticket">🎟️</i>
+      </div>
       <div class="kpi-data">
         <h4>Entradas Vendidas</h4>
-        <p class="value">{{ entradasVendidas }}</p>
+        <p class="value glow-primary-text">{{ entradasVendidas }}</p>
       </div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-icon">🍿</div>
+    
+    <div class="kpi-card neon-card">
+      <div class="kpi-icon-wrapper warning">
+        <i class="icon-candy">🍿</i>
+      </div>
       <div class="kpi-data">
         <h4>Combos Vendidos</h4>
-        <p class="value">{{ combosVendidos }}</p>
+        <p class="value text-warm glow-text">{{ combosVendidos }}</p>
       </div>
     </div>
   </section>
 
   <section class="admin-section">
-    <div class="section-header">
-      <h3>Películas en Cartelera</h3>
-      <button class="btn-primary btn-sm" (click)="abrirFormulario()">+ Nueva Película</button>
+    <div class="section-header flex-between">
+      <h3 class="subsection-title">Películas en Cartelera</h3>
+      <button class="btn btn-primary" (click)="abrirFormulario()">+ Nueva Película</button>
     </div>
 
-    <div class="table-responsive">
+    <div class="table-responsive neon-card">
       <table class="admin-table">
         <thead>
           <tr>
@@ -42,7 +52,7 @@
             <th>Duración</th>
             <th>Restricción</th>
             <th>Estado</th>
-            <th>Acciones</th>
+            <th class="text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -50,12 +60,14 @@
             <tr>
               <td>
                 <div class="movie-cell">
-                  <img [src]="movie.imagen_url" alt="{{ movie.titulo }}" class="mini-poster">
-                  <span>{{ movie.titulo }}</span>
+                  <div class="mini-poster-wrapper">
+                    <img [src]="movie.imagen_url || 'assets/placeholder.jpg'" alt="{{ movie.titulo }}" class="mini-poster">
+                  </div>
+                  <span class="movie-title">{{ movie.titulo }}</span>
                 </div>
               </td>
               <td>{{ movie.duracion_minutos }} min</td>
-              <td><span class="badge badge-dark">{{ movie.restriccion_edad }}</span></td>
+              <td><span class="badge badge-outline">{{ movie.restriccion_edad }}</span></td>
               <td>
                 <span class="badge" [class.badge-active]="movie.estado === 'cartelera'" [class.badge-warning]="movie.estado === 'proximamente'">
                   {{ movie.estado | titlecase }}
@@ -63,14 +75,14 @@
               </td>
               <td>
                 <div class="action-buttons">
-                  <button class="btn-icon" title="Editar" (click)="editarPelicula(movie)">✏️</button>
-                  <button class="btn-icon" title="Cambiar Estado" (click)="cambiarEstado(movie)">🔄</button>
+                  <button class="btn-action edit" title="Editar" (click)="editarPelicula(movie)">✏️</button>
+                  <button class="btn-action toggle" title="Cambiar Estado" (click)="cambiarEstado(movie)">🔄</button>
                 </div>
               </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="5" class="text-center">No hay películas cargadas.</td>
+              <td colspan="5" class="text-center text-muted" style="padding: 30px;">No hay películas cargadas.</td>
             </tr>
           }
         </tbody>
@@ -81,66 +93,72 @@
 
 @if (showMovieForm) {
   <div class="modal-overlay" (click)="cerrarFormulario()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-content neon-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>{{ newMovie.id ? 'Editar Película' : 'Nueva Película' }}</h3>
         <button class="close-btn" (click)="cerrarFormulario()">&times;</button>
       </div>
+      
       <div class="modal-body">
         <form (ngSubmit)="guardarPelicula()" #movieForm="ngForm">
           <div class="form-group">
-            <label>Título</label>
-            <input type="text" [(ngModel)]="newMovie.titulo" name="titulo" required>
+            <label class="form-label">Título</label>
+            <input type="text" [(ngModel)]="newMovie.titulo" name="titulo" class="form-control" required>
           </div>
+          
           <div class="form-group">
-            <label>Sinopsis</label>
-            <textarea [(ngModel)]="newMovie.sinopsis" name="sinopsis" rows="3"></textarea>
+            <label class="form-label">Sinopsis</label>
+            <textarea [(ngModel)]="newMovie.sinopsis" name="sinopsis" rows="3" class="form-control"></textarea>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Duración (min)</label>
-              <input type="number" [(ngModel)]="newMovie.duracion_minutos" name="duracion" required min="1">
+          
+          <div class="form-row flex-between" style="gap: 15px;">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label">Duración (min)</label>
+              <input type="number" [(ngModel)]="newMovie.duracion_minutos" name="duracion" class="form-control" required min="1">
             </div>
-            <div class="form-group">
-              <label>Estreno</label>
-              <input type="date" [(ngModel)]="newMovie.fecha_estreno" name="fecha" required>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label">Estreno</label>
+              <input type="date" [(ngModel)]="newMovie.fecha_estreno" name="fecha" class="form-control" required>
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Restricción</label>
-              <select [(ngModel)]="newMovie.restriccion_edad" name="restriccion">
+          
+          <div class="form-row flex-between" style="gap: 15px;">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label">Restricción</label>
+              <select [(ngModel)]="newMovie.restriccion_edad" name="restriccion" class="form-control">
                 <option value="ATP">ATP</option>
                 <option value="+13">+13</option>
                 <option value="+16">+16</option>
                 <option value="+18">+18</option>
               </select>
             </div>
-            <div class="form-group">
-              <label>Estado</label>
-              <select [(ngModel)]="newMovie.estado" name="estado">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label">Estado</label>
+              <select [(ngModel)]="newMovie.estado" name="estado" class="form-control">
                 <option value="cartelera">En Cartelera</option>
                 <option value="proximamente">Próximamente</option>
               </select>
             </div>
           </div>
+          
           <div class="form-group">
-            <label>Géneros (Múltiple)</label>
-            <select multiple [(ngModel)]="newMovie.genero_ids" name="generos" class="multi-select" style="height: 100px;">
+            <label class="form-label">Géneros (Múltiple)</label>
+            <select multiple [(ngModel)]="newMovie.genero_ids" name="generos" class="form-control multi-select" style="height: 100px;">
               @for (g of generosDisponibles; track g.id) {
                 <option [value]="g.id">{{ g.nombre }}</option>
               }
             </select>
-            <small style="color: #888; margin-top: 4px; font-size: 0.8rem;">Mantené presionado Ctrl o Cmd para seleccionar varios.</small>
-          </div>
-          <div class="form-group">
-            <label>URL Imagen Poster</label>
-            <input type="url" [(ngModel)]="newMovie.imagen_url" name="imagen">
+            <small class="text-muted" style="margin-top: 5px; display: block; font-size: 0.8rem;">Mantené presionado Ctrl/Cmd para seleccionar varios.</small>
           </div>
           
-          <div class="modal-actions">
-            <button type="button" class="btn-secondary" (click)="cerrarFormulario()">Cancelar</button>
-            <button type="submit" class="btn-primary" [disabled]="!movieForm.form.valid">Guardar</button>
+          <div class="form-group">
+            <label class="form-label">URL Imagen Poster</label>
+            <input type="url" [(ngModel)]="newMovie.imagen_url" name="imagen" class="form-control">
+          </div>
+          
+          <div class="modal-actions flex-between" style="margin-top: 30px;">
+            <button type="button" class="btn btn-secondary" (click)="cerrarFormulario()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="!movieForm.form.valid">Guardar</button>
           </div>
         </form>
       </div>

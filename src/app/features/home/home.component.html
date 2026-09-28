@@ -1,45 +1,91 @@
 <div class="home-container">
-  <section class="top-movies">
-    <h2>🔥 Top 3 Películas más vendidas</h2>
-    <div class="movies-grid">
-      @for (movie of topMovies; track movie.id) {
-        <div class="movie-card">
-          <img [src]="movie.imagen_url || 'assets/placeholder.jpg'" [alt]="movie.titulo">
-          <div class="movie-info">
-            <h3>{{ movie.titulo }}</h3>
-            <p>{{ movie.duracion_minutos }} min | {{ movie.restriccion_edad }}</p>
-            <button class="btn-primary" [routerLink]="['/checkout', movie.id]">Ver Funciones</button>
-          </div>
+  
+  @if (heroMovie) {
+    <!-- HERO SECTION (Usando el último estreno como hero) -->
+    <section class="hero-section" [style.backgroundImage]="'linear-gradient(to right, rgba(6, 5, 10, 0.95) 0%, rgba(6, 5, 10, 0.5) 50%, rgba(6, 5, 10, 0.95) 100%), url(' + (heroMovie.imagen_url || 'assets/placeholder.jpg') + ')'">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-badges">
+          <span class="badge badge-primary">Último Estreno</span>
+          <span class="badge badge-outline">{{ heroMovie.restriccion_edad }}</span>
+          <span class="badge badge-outline">{{ heroMovie.duracion_minutos }} min</span>
         </div>
-      } @empty {
-        <p>No hay películas destacadas en este momento.</p>
-      }
-    </div>
-  </section>
+        <h1 class="hero-title glow-text">{{ heroMovie.titulo }}</h1>
+        <p class="hero-description">{{ heroMovie.sinopsis || 'Vive la mejor experiencia cinematográfica en nuestras salas premium con sonido envolvente y pantallas de última generación.' }}</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" [routerLink]="['/checkout', heroMovie.id]">
+            <i class="icon-ticket"></i> Comprar Entradas
+          </button>
+        </div>
+      </div>
+    </section>
+  }
 
-  <section class="all-movies">
-    <div class="section-header">
-      <h2>En Cartelera</h2>
-      <input 
-        type="text" 
-        class="search-input" 
-        placeholder="Buscar por título..." 
-        (input)="onSearch($event)">
-    </div>
-    
-    <div class="movies-grid">
-       @for (movie of filteredMovies; track movie.id) {
-        <div class="movie-card">
-          <img [src]="movie.imagen_url || 'assets/placeholder.jpg'" [alt]="movie.titulo">
-          <div class="movie-info">
-            <h3>{{ movie.titulo }}</h3>
-            <p>{{ movie.duracion_minutos }} min | {{ movie.restriccion_edad }}</p>
-            <button class="btn-primary" [routerLink]="['/checkout', movie.id]">Comprar Entrada</button>
+  <div class="main-content">
+    <section class="top-movies">
+      <h2 class="section-title">
+        <span class="neon-line"></span> Lo Más Visto
+      </h2>
+      <div class="movies-grid">
+        @for (movie of topMovies; track movie.id) {
+          <div class="movie-card neon-card clickable-card" [routerLink]="['/checkout', movie.id]">
+            <div class="movie-poster">
+              <img [src]="movie.imagen_url || 'assets/placeholder.jpg'" [alt]="movie.titulo">
+              <div class="poster-overlay">
+                <span class="btn btn-primary btn-sm">Comprar Entradas</span>
+              </div>
+            </div>
+            <div class="movie-info">
+              <h3>{{ movie.titulo }}</h3>
+              <div class="movie-meta">
+                <span class="meta-item">{{ movie.duracion_minutos }} min</span>
+                <span class="meta-dot">•</span>
+                <span class="meta-item text-accent">{{ movie.restriccion_edad }}</span>
+              </div>
+            </div>
           </div>
+        } @empty {
+          <p class="text-muted">No hay películas destacadas en este momento.</p>
+        }
+      </div>
+    </section>
+
+    <section class="all-movies">
+      <div class="section-header flex-between">
+        <h2 class="section-title">
+          <span class="neon-line"></span> En Cartelera
+        </h2>
+        <div class="search-box">
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Buscar película..." 
+            (input)="onSearch($event)">
         </div>
-      } @empty {
-        <p>No se encontraron películas para tu búsqueda.</p>
-      }
-    </div>
-  </section>
+      </div>
+      
+      <div class="movies-grid">
+         @for (movie of filteredMovies; track movie.id) {
+          <div class="movie-card neon-card clickable-card" [routerLink]="['/checkout', movie.id]">
+            <div class="movie-poster">
+              <img [src]="movie.imagen_url || 'assets/placeholder.jpg'" [alt]="movie.titulo">
+              <div class="poster-overlay">
+                <span class="btn btn-primary btn-sm">Comprar Entradas</span>
+              </div>
+            </div>
+            <div class="movie-info">
+              <h3>{{ movie.titulo }}</h3>
+              <div class="movie-meta">
+                <span class="meta-item">{{ movie.duracion_minutos }} min</span>
+                <span class="meta-dot">•</span>
+                <span class="meta-item text-accent">{{ movie.restriccion_edad }}</span>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <p class="text-muted">No se encontraron películas para tu búsqueda.</p>
+        }
+      </div>
+    </section>
+  </div>
 </div>

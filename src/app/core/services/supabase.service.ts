@@ -7,43 +7,39 @@ import { Movie, UserProfile } from '../../shared/models';
   providedIn: 'root'
 })
 export class SupabaseService {
-  private _supabase: SupabaseClient;
+  public readonly client: SupabaseClient;
 
   constructor() {
-    this._supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
-  }
-  
-  get client() {
-    return this._supabase;
+    this.client = createClient(environment.supabaseUrl, environment.supabaseKey);
   }
 
   // --- AUTHENTICATION ---
   get auth() {
-    return this._supabase.auth;
+    return this.client.auth;
   }
 
   async signIn(email: string, password: string) {
-    const { data, error } = await this._supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await this.client.auth.signInWithPassword({ email, password });
     if (error) throw error;
     return data;
   }
 
   async signUp(email: string, password: string, profileData: any) {
-    const { data, error } = await this._supabase.auth.signUp({ 
+    const { data, error } = await this.client.auth.signUp({ 
       email, 
       password 
     });
     if (error) throw error;
     
     // Fuerzo el inicio de sesión explícito si Supabase no nos dio la sesión automática
-    const { data: sessionData } = await this._supabase.auth.getSession();
+    const { data: sessionData } = await this.client.auth.getSession();
     if (!sessionData.session) {
-       await this._supabase.auth.signInWithPassword({ email, password });
+       await this.client.auth.signInWithPassword({ email, password });
     }
 
     // Si se creó el usuario en Auth, creamos el perfil en nuestra tabla `perfiles`
     if (data.user) {
-      const { error: profileError } = await this._supabase.from('perfiles').insert({
+      const { error: profileError } = await this.client.from('perfiles').insert({
         id: data.user.id,
         email: email,
         ...profileData
@@ -55,12 +51,12 @@ export class SupabaseService {
   }
 
   async signOut() {
-    const { error } = await this._supabase.auth.signOut();
+    const { error } = await this.client.auth.signOut();
     if (error) throw error;
   }
 
   async getMovies(): Promise<Movie[]> {
-    const { data, error } = await this._supabase
+    const { data, error } = await this.client
       .from('peliculas')
       .select('*')
       .eq('estado', 'cartelera');
@@ -70,7 +66,7 @@ export class SupabaseService {
   }
 
   async getAllMovies(): Promise<Movie[]> {
-    const { data, error } = await this._supabase
+    const { data, error } = await this.client
       .from('peliculas')
       .select('*');
       
@@ -80,7 +76,7 @@ export class SupabaseService {
 
   async getTopSellingMovies(): Promise<Movie[]> {
     // 1. Obtener todas las butacas vendidas y su pelicula_id
-    const { data: butacas, error: butacasError } = await this._supabase
+    const { data: butacas, error: butacasError } = await this.client
       .from('butacas_ocupadas')
       .select('funciones(pelicula_id)');
 
@@ -88,10 +84,10 @@ export class SupabaseService {
 
     // 2. Contar ventas por pelicula_id
     const conteoVentas: { [peliculaId: string]: number } = {};
-    butacas?.forEach((b: any) => {
-      const pId = b.funciones?.pelicula_id;
-      if (pId) {
-        conteoVentas[pId] = (conteoVentas[pId] || 0) + 1;
+    butacas?.forEach((butaca: any) => {
+      const peliculaId = butaca.funciones?.pelicula_id;
+      if (peliculaId) {
+        conteoVentas[peliculaId] = (conteoVentas[peliculaId] || 0) + 1;
       }
     });
 
@@ -103,13 +99,13 @@ export class SupabaseService {
 
     if (top3Ids.length === 0) {
       // Si no hay ventas, devolver 3 peliculas por defecto
-      const { data, error } = await this._supabase.from('peliculas').select('*').limit(3);
+      const { data, error } = await this.client.from('peliculas').select('*').limit(3);
       if (error) throw error;
       return data || [];
     }
 
     // 4. Obtener los datos completos de esas películas
-    const { data: peliculas, error: peliError } = await this._supabase
+    const { data: peliculas, error: peliError } = await this.client
       .from('peliculas')
       .select('*')
       .in('id', top3Ids);
@@ -118,14 +114,14 @@ export class SupabaseService {
 
     // 5. Mantener el orden de más vendida a menos vendida
     const peliculasOrdenadas = top3Ids
-      .map(id => peliculas?.find(p => p.id === id))
-      .filter(p => !!p) as Movie[];
+      .map(peliculaId => peliculas?.find(pelicula => pelicula.id === peliculaId))
+      .filter(pelicula => !!pelicula) as Movie[];
     
     return peliculasOrdenadas;
   }
 
   async getFunciones(peliculaId: string): Promise<any[]> {
-    const { data, error } = await this._supabase
+    const { data, error } = await this.client
       .from('funciones')
       .select('*, salas(nombre), peliculas(titulo)')
       .eq('pelicula_id', peliculaId)
@@ -136,7 +132,7 @@ export class SupabaseService {
   }
 
   async getProfile(userId: string): Promise<UserProfile | null> {
-    const { data, error } = await this._supabase
+    const { data, error } = await this.client
       .from('perfiles')
       .select('*')
       .eq('id', userId)

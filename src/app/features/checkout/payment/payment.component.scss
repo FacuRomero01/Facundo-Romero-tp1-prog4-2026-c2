@@ -1,119 +1,246 @@
 .payment-container {
   display: flex;
   justify-content: center;
-  margin-top: 1rem;
+  padding: 20px 0;
 }
 
 .summary-card, .ticket-card {
-  background: #2a2a2a;
-  border-radius: 8px;
-  padding: 2rem;
   width: 100%;
-  max-width: 500px;
-  border: 1px solid #444;
+  max-width: 550px;
+  background-color: rgba(23, 19, 40, 0.7);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(212, 0, 255, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+}
 
+.summary-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: var(--border-subtle);
+  
+  i {
+    font-size: 2rem;
+    color: var(--color-primary);
+    text-shadow: var(--glow-primary);
+  }
+  
   h3 {
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    color: #fff;
-    border-bottom: 1px solid #444;
-    padding-bottom: 0.5rem;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    margin: 0;
+    letter-spacing: 1px;
   }
 }
 
-.summary-section {
-  margin-bottom: 1.5rem;
+.section-subtitle {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  h4 {
-    margin-bottom: 0.75rem;
-    color: #ccc;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-  }
+.summary-section {
+  margin-bottom: 30px;
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
-  color: #ddd;
-
-  &.total {
-    font-size: 1.1rem;
-    color: #fff;
-    margin-top: 1rem;
-  }
-
-  &.final-total {
-    font-size: 1.3rem;
-    font-weight: bold;
-    color: #e50914;
-    margin-top: 1rem;
-  }
-}
-
-hr {
-  border-color: #444;
-  margin: 1.5rem 0;
-}
-
-.credits-section {
-  background: #1a1a1a;
-  padding: 1rem;
-  border-radius: 4px;
-  margin-top: 1rem;
-  color: #bbb;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 1rem;
   
-  label {
+  .item-name {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
+    gap: 10px;
   }
-}
-
-.empty-text {
-  color: #777;
-  font-style: italic;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.qr-container {
-  background: #fff;
-  padding: 1rem;
-  display: inline-block;
-  border-radius: 8px;
-  margin: 1.5rem 0;
-
-  img {
-    display: block;
-    max-width: 100%;
-  }
-}
-
-.ticket-details {
-  text-align: left;
-  background: #1a1a1a;
-  padding: 1rem;
-  border-radius: 4px;
   
-  p {
-    margin: 0.5rem 0;
-    color: #ddd;
+  .badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--color-text-muted);
+  }
+  
+  .qty-badge {
+    color: var(--color-accent-warm);
+    font-weight: 900;
+  }
+  
+  .item-price {
+    font-family: var(--font-heading);
+    font-weight: 500;
+  }
+  
+  &.subtotal {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+  }
+  
+  &.final-total {
+    font-size: 1.5rem;
+    font-weight: 900;
+    font-family: var(--font-heading);
+    margin-top: 20px;
+    text-transform: uppercase;
+  }
+}
 
-    strong {
-      color: #fff;
+.summary-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 25px 0;
+}
+
+/* DESCUENTOS */
+.discount-section {
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  margin-bottom: 25px;
+  
+  .coupon-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .credit-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-primary);
+    }
+    
+    .credit-amount {
+      margin-left: auto;
+      color: var(--color-success);
+      font-weight: 700;
     }
   }
 }
 
-.w-100 {
-  width: 100%;
+/* TICKET FINAL */
+.ticket-header {
+  margin-bottom: 30px;
+  
+  h3 {
+    font-size: 2rem;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
 }
 
-.mt-2 {
-  margin-top: 1.5rem;
+.qr-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  
+  .qr-frame {
+    background-color: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(212, 0, 255, 0.4);
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -10px; left: -10px; right: -10px; bottom: -10px;
+      border: 2px dashed var(--color-primary);
+      border-radius: 15px;
+      pointer-events: none;
+    }
+    
+    img {
+      display: block;
+      width: 180px;
+      height: 180px;
+    }
+  }
+}
+
+.ticket-details {
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: 25px;
+  text-align: left;
+  
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+    padding-bottom: 10px;
+    
+    &:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    &.candy-row {
+      flex-direction: column;
+      gap: 10px;
+      
+      .candy-item-ticket {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+    }
+  }
+  
+  .detail-label {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+  }
+  
+  .detail-value {
+    font-weight: 600;
+  }
+  
+  .seat-badge {
+    display: inline-block;
+    background-color: rgba(212, 0, 255, 0.2);
+    border: 1px solid var(--color-primary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 5px;
+    font-size: 0.85rem;
+  }
+  
+  .ticket-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 2px solid rgba(212, 0, 255, 0.3);
+    font-size: 1.3rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
 }

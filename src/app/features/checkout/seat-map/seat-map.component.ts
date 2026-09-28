@@ -23,12 +23,12 @@ export class SeatMapComponent implements OnInit, OnDestroy {
   toggleSeat(seat: Seat) {
     if (seat.status === 'occupied') return;
     
-    // Usamos el signal inyectado para mutar el estado
-    const currentSeats = [...this.bookingService.seats()];
-    const idx = currentSeats.findIndex(s => s.id === seat.id);
-    if (idx !== -1) {
-       currentSeats[idx].status = currentSeats[idx].status === 'selected' ? 'available' : 'selected';
-       this.bookingService.seats.set(currentSeats);
-    }
+    // Usamos el signal inyectado para mutar el estado con update()
+    this.bookingService.seats.update(seats => 
+      seats.map(mappedSeat => mappedSeat.id === seat.id 
+        ? { ...mappedSeat, status: mappedSeat.status === 'selected' ? 'available' : 'selected' } 
+        : mappedSeat
+      )
+    );
   }
 }

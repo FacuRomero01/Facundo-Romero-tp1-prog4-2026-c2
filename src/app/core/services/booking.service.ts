@@ -40,21 +40,21 @@ export class BookingService {
   
   generateSeatMap() {
     const newSeats: Seat[] = [];
-    for (let r of this.rows) {
+    for (let letraFila of this.rows) {
       // Regla VIP
-      const isVip = ['R', 'S', 'T'].includes(r);
-      const mult = isVip ? 1.5 : 1.0;
+      const isVip = ['R', 'S', 'T'].includes(letraFila);
+      const multiplicadorPrecio = isVip ? 1.5 : 1.0;
       
-      for (let c = 1; c <= 28; c++) {
-        let isAccessible = (r === 'J');
+      for (let numeroColumna = 1; numeroColumna <= 28; numeroColumna++) {
+        let isAccessible = (letraFila === 'J');
         
         newSeats.push({
-          id: `${r}-${c}`,
-          row: r,
-          col: c,
+          id: `${letraFila}-${numeroColumna}`,
+          row: letraFila,
+          col: numeroColumna,
           status: 'available',
           type: isAccessible ? 'accessible' : (isVip ? 'vip' : 'regular'),
-          priceMultiplier: mult
+          priceMultiplier: multiplicadorPrecio
         });
       }
     }
@@ -91,11 +91,11 @@ export class BookingService {
 
     // Inserto los asientos relacionados al ticket
     if (seatsToReserve.length > 0) {
-      const inserts = seatsToReserve.map(s => ({
+      const inserts = seatsToReserve.map(asiento => ({
         funcion_id: funcionId,
         ticket_id: ticket.id,
-        fila: s.row,
-        columna: s.col
+        fila: asiento.row,
+        columna: asiento.col
       }));
       const { error: seatsError } = await this.supabase.client
         .from('butacas_ocupadas')
@@ -105,12 +105,12 @@ export class BookingService {
     }
 
     // Inserto el candy asociado al ticket
-    const candy = this.candyItems().filter(c => c.quantity > 0);
+    const candy = this.candyItems().filter(itemCandy => itemCandy.quantity > 0);
     if (candy.length > 0) {
-      const candyInserts = candy.map(c => ({
+      const candyInserts = candy.map(itemCandy => ({
         ticket_id: ticket.id,
-        producto_id: c.id,
-        cantidad: c.quantity
+        producto_id: itemCandy.id,
+        cantidad: itemCandy.quantity
       }));
       try {
         const { error: candyError } = await this.supabase.client
@@ -145,34 +145,30 @@ export class BookingService {
   }
 
   private updateSeatsStatus(occupied: {fila: string, columna: number}[], status: 'occupied'|'available') {
-    const current = [...this.seats()];
-    occupied.forEach(o => {
-      const idx = current.findIndex(s => s.row === o.fila && s.col === o.columna);
-      if (idx !== -1) {
-         current[idx] = { ...current[idx], status };
-      }
-    });
-    this.seats.set(current);
+    this.seats.update(seats => 
+      seats.map(seat => 
+        occupied.some(occupiedSeat => occupiedSeat.fila === seat.row && occupiedSeat.columna === seat.col) 
+          ? { ...seat, status } 
+          : seat
+      )
+    );
   }
   
   private updateSeat(row: string, col: number, status: 'occupied'|'available') {
-    const current = [...this.seats()];
-    const idx = current.findIndex(s => s.row === row && s.col === col);
-    if (idx !== -1) {
-       current[idx] = { ...current[idx], status };
-       this.seats.set(current);
-    }
+    this.seats.update(seats => 
+      seats.map(seat => (seat.row === row && seat.col === col) ? { ...seat, status } : seat)
+    );
   }
 
   async loadCandyItems() {
     const { data } = await this.supabase.client.from('candy_productos').select('*');
     if (data && data.length > 0) {
-      const items = data.map(d => ({
-        id: d.id,
-        name: d.nombre || 'Producto',
-        description: d.categoria || (d.es_combo ? 'Combo' : 'Snack'),
-        price: d.precio || 0,
-        imageUrl: d.imagen_url || d.icono || '🍿',
+      const items = data.map(datosCandy => ({
+        id: datosCandy.id,
+        name: datosCandy.nombre || 'Producto',
+        description: datosCandy.categoria || (datosCandy.es_combo ? 'Combo' : 'Snack'),
+        price: datosCandy.precio || 0,
+        imageUrl: datosCandy.imagen_url || datosCandy.icono || '🍿',
         quantity: 0
       }));
       this.candyItems.set(items);

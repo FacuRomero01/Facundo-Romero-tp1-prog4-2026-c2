@@ -17,6 +17,7 @@ export class HomeComponent implements OnInit {
   topMovies: Movie[] = [];
   allMovies: Movie[] = [];
   filteredMovies: Movie[] = []; // Nueva variable para mostrar las filtradas
+  heroMovie: Movie | null = null; // Pelicula destacada en el hero
 
   async ngOnInit() {
     try {
@@ -25,6 +26,15 @@ export class HomeComponent implements OnInit {
       
       // Al inicio, las películas filtradas son todas
       this.filteredMovies = [...this.allMovies];
+
+      // El hero será el último estreno (la fecha más reciente)
+      if (this.allMovies.length > 0) {
+        this.heroMovie = [...this.allMovies].sort((peliculaA, peliculaB) => 
+          new Date(peliculaB.fecha_estreno).getTime() - new Date(peliculaA.fecha_estreno).getTime()
+        )[0];
+      } else if (this.topMovies.length > 0) {
+        this.heroMovie = this.topMovies[0];
+      }
       
       this.cdr.detectChanges();
     } catch (error) {
@@ -37,6 +47,7 @@ export class HomeComponent implements OnInit {
       this.topMovies = [mockMovie, {...mockMovie, id: '2', titulo: 'Inception 2'}];
       this.allMovies = this.topMovies;
       this.filteredMovies = [...this.allMovies];
+      this.heroMovie = this.allMovies[0];
       this.cdr.detectChanges();
     }
   }

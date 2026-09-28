@@ -1,23 +1,6 @@
 @import '../login/login.component.scss';
 
-.register-card {
-  max-width: 500px; // Un poco más ancha porque tiene 2 columnas
-}
-
-.form-row {
-  display: flex;
-  gap: 1rem;
-  
-  .half {
-    flex: 1;
-  }
-}
-
-// Estilos para los select
-select.form-control {
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath d='M8 11.5l-5-5h10l-5 5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  padding-right: 2.5rem;
+option {
+  background-color: var(--color-surface);
+  color: var(--color-text);
 }

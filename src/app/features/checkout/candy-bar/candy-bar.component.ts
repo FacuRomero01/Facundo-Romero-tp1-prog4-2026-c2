@@ -20,13 +20,13 @@ export class CandyBarComponent implements OnInit {
 
   incrementQuantity(item: CandyItem) {
     this.bookingService.candyItems.update(items => 
-      items.map(c => c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c)
+      items.map(productoCandy => productoCandy.id === item.id ? { ...productoCandy, quantity: productoCandy.quantity + 1 } : productoCandy)
     );
   }
 
   decrementQuantity(item: CandyItem) {
     this.bookingService.candyItems.update(items => 
-      items.map(c => c.id === item.id && c.quantity > 0 ? { ...c, quantity: c.quantity - 1 } : c)
+      items.map(productoCandy => productoCandy.id === item.id && productoCandy.quantity > 0 ? { ...productoCandy, quantity: productoCandy.quantity - 1 } : productoCandy)
     );
   }
 }

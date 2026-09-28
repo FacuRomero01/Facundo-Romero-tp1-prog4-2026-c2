@@ -1,13 +1,68 @@
-/* VARIABLES GLOBALES - TEMA OSCURO (ESTILO CINE) */
+/* ==========================================================================
+   NEON CINEMA - GLOBAL DESIGN SYSTEM
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&family=Inter:wght@300;400;500;600&display=swap');
+
 :root {
-  --primary-color: #e50914; /* Rojo estilo cine/Netflix */
-  --bg-color: #141414; /* Fondo oscuro */
-  --surface-color: #1f1f1f;
-  --text-color: #ffffff;
-  --text-muted: #b3b3b3;
-  --font-family: 'Inter', 'Segoe UI', sans-serif;
+  /* BACKGROUNDS */
+  --color-background: #06050a; /* Negro profundo con leve tinte violeta */
+  --color-background-secondary: #0f0c1b;
+  --color-surface: #171328;
+  --color-surface-hover: #221d3a;
+  
+  /* BRAND COLORS */
+  --color-primary: #d400ff; /* Magenta/Fucsia Neón */
+  --color-primary-hover: #e855ff;
+  --color-primary-dark: #6e008a;
+  
+  --color-secondary: #4a00e0; /* Violeta/Azul profundo */
+  --color-secondary-hover: #6a2bea;
+  
+  --color-accent: #00e5ff; /* Cian / Azul Eléctrico */
+  --color-accent-warm: #ffb300; /* Marquesina / Cálido */
+  --color-cinema-red: #ff1744;
+
+  /* TEXT */
+  --color-text: #ffffff;
+  --color-text-secondary: #b8b2c6;
+  --color-text-muted: #6b647f;
+
+  /* STATUS */
+  --color-success: #00e676;
+  --color-warning: #ffea00;
+  --color-error: #ff1744;
+  --color-info: #2979ff;
+
+  /* TYPOGRAPHY */
+  --font-heading: 'Montserrat', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* EFFECTS */
+  --glow-primary: 0 0 10px rgba(212, 0, 255, 0.4), 0 0 20px rgba(212, 0, 255, 0.2);
+  --glow-primary-intense: 0 0 15px rgba(212, 0, 255, 0.6), 0 0 30px rgba(212, 0, 255, 0.4);
+  --glow-accent: 0 0 10px rgba(0, 229, 255, 0.4);
+  --shadow-surface: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-float: 0 15px 40px rgba(0, 0, 0, 0.8);
+  
+  /* BORDERS */
+  --border-subtle: 1px solid rgba(255, 255, 255, 0.05);
+  --border-neon: 1px solid var(--color-primary);
+  --border-neon-accent: 1px solid var(--color-accent);
+
+  /* BORDER RADIUS */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 50px;
+
+  /* TRANSITIONS */
+  --transition-fast: 0.2s ease-in-out;
+  --transition-smooth: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+/* ==========================================================================
+   RESET & BASE
+   ========================================================================== */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -15,31 +70,185 @@
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  font-family: var(--font-family);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: radial-gradient(circle at 50% 0%, var(--color-background-secondary) 0%, transparent 70%);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+  text-shadow: 0 0 8px rgba(212, 0, 255, 0.5);
 }
 
 .main-container {
-  min-height: calc(100vh - 60px); /* Restamos la altura del navbar */
-  padding: 20px;
-  max-width: 1200px;
+  min-height: calc(100vh - 80px); 
+  padding: 30px 20px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
-/* UTILIDADES */
-.btn-primary {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
+  transition: all var(--transition-fast);
+  border: none;
+  outline: none;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  box-shadow: var(--glow-primary);
   
   &:hover {
-    background-color: #b20710;
+    background-color: var(--color-primary-hover);
+    box-shadow: var(--glow-primary-intense);
+    transform: translateY(-2px);
   }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-primary);
+  border: var(--border-neon);
+  
+  &:hover {
+    background-color: rgba(212, 0, 255, 0.1);
+    box-shadow: var(--glow-primary);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-accent {
+  background-color: var(--color-accent);
+  color: var(--color-background);
+  box-shadow: var(--glow-accent);
+  
+  &:hover {
+    background-color: #33eaff;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+    transform: translateY(-2px);
+  }
+}
+
+/* ==========================================================================
+   CARDS & SURFACES
+   ========================================================================== */
+.neon-card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: var(--border-subtle);
+  box-shadow: var(--shadow-surface);
+  padding: 24px;
+  transition: all var(--transition-smooth);
+  
+  &:hover {
+    transform: translateY(-5px);
+    background-color: var(--color-surface-hover);
+    border-color: rgba(212, 0, 255, 0.2);
+    box-shadow: var(--shadow-float), var(--glow-primary);
+  }
+}
+
+/* ==========================================================================
+   FORM ELEMENTS
+   ========================================================================== */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary), var(--glow-primary);
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+  
+  &::placeholder {
+    color: var(--color-text-muted);
+  }
+}
+
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
+.text-center { text-align: center; }
+.text-primary { color: var(--color-primary); }
+.text-accent { color: var(--color-accent); }
+.text-warm { color: var(--color-accent-warm); }
+.text-muted { color: var(--color-text-muted); }
+
+.glow-text {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+.glow-primary-text {
+  color: var(--color-primary);
+  text-shadow: var(--glow-primary);
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }

@@ -1,37 +1,44 @@
 <div class="seat-map-container">
+  
   <div class="screen-indicator">
-    <div class="screen">PANTALLA</div>
+    <div class="screen-glow"></div>
+    <div class="screen-text">PANTALLA</div>
   </div>
 
-  <div class="seats-grid">
-    @for (row of bookingService.rows; track row) {
-      <div class="seat-row">
-        <span class="row-label">{{ row }}</span>
-        
-        <!-- Simulamos las butacas de esta fila -->
-        <div class="row-seats">
-          @for (seat of bookingService.seats(); track seat.id) {
-            @if (seat.row === row) {
-              <div 
-                class="seat" 
-                [class.aisle-right]="seat.col === 4 || seat.col === 24"
-                [ngClass]="[seat.status, seat.type]"
-                (click)="toggleSeat(seat)"
-                [title]="'Fila ' + seat.row + ' Columna ' + seat.col + ' - ' + (seat.type === 'vip' ? 'VIP ($$$)' : (seat.type === 'accessible' ? 'Accesible' : 'Estándar'))">
-                {{ seat.col }}
-              </div>
+  <div class="seats-wrapper">
+    <div class="seats-grid">
+      @for (row of bookingService.rows; track row) {
+        <div class="seat-row">
+          <span class="row-label">{{ row }}</span>
+          
+          <div class="row-seats">
+            @for (seat of bookingService.seats(); track seat.id) {
+              @if (seat.row === row) {
+                <div 
+                  class="seat" 
+                  [class.aisle-right]="seat.col === 4 || seat.col === 24"
+                  [ngClass]="[seat.status, seat.type]"
+                  (click)="toggleSeat(seat)"
+                  [title]="'Fila ' + seat.row + ' Columna ' + seat.col + ' - ' + (seat.type === 'vip' ? 'VIP' : (seat.type === 'accessible' ? 'Accesible' : 'Estándar'))">
+                  @if (seat.status === 'selected') {
+                    <span class="seat-number">{{ seat.col }}</span>
+                  }
+                </div>
+              }
             }
-          }
+          </div>
+          
+          <span class="row-label right">{{ row }}</span>
         </div>
-      </div>
-    }
+      }
+    </div>
   </div>
 
   <div class="leyenda">
-    <div class="legend-item"><div class="seat available"></div> Disponible</div>
-    <div class="legend-item"><div class="seat occupied"></div> Ocupada</div>
-    <div class="legend-item"><div class="seat selected"></div> Tu selección</div>
-    <div class="legend-item"><div class="seat vip available"></div> VIP (Filas R, S, T)</div>
-    <div class="legend-item"><div class="seat accessible"></div> Accesible (Fila J)</div>
+    <div class="legend-item"><div class="seat-demo available"></div> <span>Disponible</span></div>
+    <div class="legend-item"><div class="seat-demo selected"></div> <span>Seleccionado</span></div>
+    <div class="legend-item"><div class="seat-demo occupied"></div> <span>Ocupado</span></div>
+    <div class="legend-item"><div class="seat-demo vip available"></div> <span>VIP</span></div>
+    <div class="legend-item"><div class="seat-demo accessible available"></div> <span>Accesible</span></div>
   </div>
 </div>
