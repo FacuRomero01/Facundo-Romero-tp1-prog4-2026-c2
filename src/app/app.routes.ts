@@ -15,15 +15,22 @@ const adminGuard = async () => {
   return profile?.rol === 'admin' ? true : inject(Router).parseUrl('/home');
 };
 
+const employeeGuard = async () => {
+  const supabase = inject(SupabaseService);
+  const session = (await supabase.auth.getSession())?.data?.session;
+  if (!session) return inject(Router).parseUrl('/login');
+  const profile = await supabase.getProfile(session.user.id);
+  return (profile?.rol === 'empleado' || profile?.rol === 'admin') ? true : inject(Router).parseUrl('/home');
+};
+
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'home',
     pathMatch: 'full'
   },
   {
     path: 'home',
-    canActivate: [authGuard],
     loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
   },
   {
@@ -36,13 +43,22 @@ export const routes: Routes = [
   },
   {
     path: 'checkout/:funcionId',
-    canActivate: [authGuard],
     loadComponent: () => import('./features/checkout/booking-flow/booking-flow.component').then(m => m.BookingFlowComponent)
   },
   {
     path: 'admin',
     canActivate: [adminGuard],
     loadComponent: () => import('./features/admin/dashboard/dashboard.component').then(m => m.AdminDashboardComponent)
+  },
+  {
+    path: 'validador',
+    canActivate: [employeeGuard],
+    loadComponent: () => import('./features/employee/scanner/scanner.component').then(m => m.ScannerComponent)
+  },
+  {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
   },
   {
     path: '**',

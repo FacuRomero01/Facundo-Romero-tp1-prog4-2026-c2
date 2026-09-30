@@ -8,6 +8,7 @@ export interface Movie {
   estado: 'proximamente' | 'cartelera' | 'retirada';
   fecha_estreno: string;
   precio_preventa?: number;
+  generos?: { nombre: string }[] | any[];
 }
 
 export interface UserProfile {

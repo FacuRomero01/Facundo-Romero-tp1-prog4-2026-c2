@@ -1,0 +1,103 @@
+<div class="main-container" style="max-width: 1000px; margin: 0 auto; padding-top: 40px; padding-bottom: 60px;">
+  <h2 class="section-title">
+    <span class="neon-line"></span> Mi Perfil
+  </h2>
+
+  @if (loading) {
+    <div class="text-center" style="padding: 40px;"><p>Cargando perfil...</p></div>
+  } @else {
+    @if (userProfile) {
+      <div class="profile-header neon-card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;">
+        <div>
+          <h3>{{ userProfile.nombre }} {{ userProfile.apellido }}</h3>
+          <p class="text-muted">{{ userProfile.email }}</p>
+        </div>
+        <div style="display: flex; gap: 20px;">
+          <div class="badge badge-outline" style="font-size: 1rem; padding: 10px 15px;">
+            <i class="icon-star" style="color: var(--color-primary);"></i> {{ userProfile.puntos }} Puntos
+          </div>
+          <div class="badge badge-outline" style="font-size: 1rem; padding: 10px 15px; border-color: var(--color-success); color: var(--color-success);">
+            <i class="icon-wallet"></i> Saldo: ${{ userProfile.credito }}
+          </div>
+        </div>
+      </div>
+
+      <div class="tickets-section">
+        <h3 style="margin-bottom: 20px; color: var(--color-accent);">Próximas Funciones</h3>
+        
+        <div class="movies-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+          @for (ticket of activeTickets; track ticket.id) {
+            <div class="movie-card neon-card" [style.opacity]="ticket.estado === 'cancelado' ? '0.5' : '1'">
+              <div class="movie-info" style="padding-top: 15px;">
+                <h4 style="margin-bottom: 5px;">{{ ticket.funciones?.peliculas?.titulo }}</h4>
+                <p class="text-muted" style="font-size: 0.9rem;">{{ ticket.funciones?.fecha_hora | spanishDate:'short' }}</p>
+                <div style="margin-top: 10px;">
+                  <span class="badge badge-outline" [class.badge-primary]="ticket.estado === 'valido'">{{ ticket.estado | uppercase }}</span>
+                  <p style="margin-top: 10px; font-weight: bold;">Código: {{ ticket.codigo_qr }}</p>
+                </div>
+                
+                @if (ticket.estado === 'valido' && canCancel(ticket.funciones?.fecha_hora)) {
+                  <button class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 15px;" (click)="cancelTicket(ticket)">
+                    Cancelar y Devolver Crédito
+                  </button>
+                } @else if (ticket.estado === 'valido') {
+                  <p class="text-error" style="font-size: 0.8rem; margin-top: 10px;">Ya no se puede cancelar (falta menos de 2 hs).</p>
+                }
+              </div>
+            </div>
+          } @empty {
+            <p class="text-muted">No tenés entradas para próximas funciones.</p>
+          }
+        </div>
+      </div>
+
+      <div class="tickets-section" style="margin-top: 50px;">
+        <h3 style="margin-bottom: 20px; color: var(--color-primary);">Mis Películas (Historial)</h3>
+        
+        <div class="movies-grid">
+          @for (ticket of paginatedPastTickets; track ticket.id) {
+            <div class="movie-card neon-card">
+              <div class="movie-poster">
+                <img [src]="ticket.funciones?.peliculas?.imagen_url || 'assets/placeholder.jpg'" [alt]="ticket.funciones?.peliculas?.titulo">
+              </div>
+              <div class="movie-info">
+                <h3>{{ ticket.funciones?.peliculas?.titulo }}</h3>
+                <div class="movie-meta" style="margin-bottom: auto;">
+                  <span class="meta-item">{{ ticket.funciones?.fecha_hora | spanishDate:'date' }}</span>
+                </div>
+                
+                @if (reviewPeliculaId !== ticket.funciones?.peliculas?.id) {
+                  <button class="btn btn-outline btn-sm" style="width: 100%; margin-top: 15px; padding: 10px;" (click)="abrirResena(ticket.funciones?.peliculas?.id)">
+                    <i class="icon-star"></i> Dejar Reseña
+                  </button>
+                } @else {
+                  <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <select [(ngModel)]="reviewRating" class="form-control" style="padding: 5px; margin-bottom: 10px;">
+                      <option [value]="5">⭐⭐⭐⭐⭐ (5)</option>
+                      <option [value]="4">⭐⭐⭐⭐ (4)</option>
+                      <option [value]="3">⭐⭐⭐ (3)</option>
+                      <option [value]="2">⭐⭐ (2)</option>
+                      <option [value]="1">⭐ (1)</option>
+                    </select>
+                    <textarea [(ngModel)]="reviewComment" class="form-control" rows="2" placeholder="¿Qué te pareció?" style="margin-bottom: 10px; resize: none;"></textarea>
+                    <button class="btn btn-primary btn-sm" style="width: 100%;" (click)="enviarResena()">Enviar Reseña</button>
+                  </div>
+                }
+              </div>
+            </div>
+          } @empty {
+            <p class="text-muted" style="grid-column: 1 / -1;">Aún no fuiste a ver ninguna película.</p>
+          }
+        </div>
+        
+        @if (pastTickets.length > pageSize) {
+          <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 30px;">
+            <button class="btn btn-secondary btn-sm" (click)="prevPage()" [disabled]="currentPage === 1">Anterior</button>
+            <span class="text-muted">Página {{ currentPage }} de {{ totalPages }}</span>
+            <button class="btn btn-secondary btn-sm" (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,94 @@
+<div class="main-container" style="max-width: 600px; margin: 0 auto; padding-top: 50px;">
+  <div class="neon-card text-center">
+    <h2 class="section-title" style="justify-content: center; margin-bottom: 30px;">
+      <i class="icon-qr" style="color: var(--color-primary); margin-right: 10px;"></i>
+      Validador de Entradas
+    </h2>
+
+    <div class="form-group">
+      <label class="form-label text-left">Código QR del Ticket</label>
+      <div style="display: flex; gap: 10px;">
+        <input 
+          type="text" 
+          class="form-control" 
+          [(ngModel)]="qrCode" 
+          placeholder="Ej: ABCD-1234" 
+          (keyup.enter)="buscarTicket()"
+          [disabled]="loading"
+          style="text-transform: none;">
+        <button class="btn btn-primary" (click)="buscarTicket()" [disabled]="loading || !qrCode">
+          Buscar
+        </button>
+      </div>
+    </div>
+
+    @if (errorMsg) {
+      <div class="error-msg" style="color: var(--color-error); padding: 15px; border: 1px solid var(--color-error); border-radius: var(--radius-sm); margin-top: 20px;">
+        {{ errorMsg }}
+      </div>
+    }
+
+    @if (ticketData) {
+      <div class="ticket-info text-left" style="margin-top: 30px; border-top: var(--border-subtle); padding-top: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 style="color: var(--color-accent);">Ticket Encontrado</h3>
+          <span class="badge" 
+                [class.badge-primary]="ticketData.ticket.estado === 'valido'"
+                [style.background]="ticketData.ticket.estado === 'usado' ? 'var(--color-error)' : ''">
+            {{ ticketData.ticket.estado | uppercase }}
+          </span>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <p><strong>Película:</strong> {{ ticketData.ticket.funciones?.peliculas?.titulo }}</p>
+          <p><strong>Sala:</strong> {{ ticketData.ticket.funciones?.salas?.nombre }}</p>
+          <p><strong>Horario:</strong> {{ ticketData.ticket.funciones?.fecha_hora | date:'dd/MM/yyyy HH:mm' }}</p>
+          <p><strong>Butacas:</strong></p>
+          <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;">
+            @for (butaca of ticketData.butacas; track butaca.id) {
+              <span class="badge badge-outline">{{ butaca.fila }}{{ butaca.columna }}</span>
+            }
+          </div>
+        </div>
+
+        @if (ticketData.candy && ticketData.candy.length > 0) {
+          <div style="margin-bottom: 20px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+            <p><strong>Candy Bar Comprado:</strong></p>
+            <ul style="list-style: none; padding: 0; margin-top: 10px;">
+              @for (c of ticketData.candy; track c.producto_id) {
+                <li style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                  <span>{{ c.cantidad }}x {{ c.candy_productos?.nombre }}</span>
+                  <span [style.color]="c.estado === 'entregado' ? 'var(--color-success)' : 'var(--color-warning)'">
+                    {{ c.estado | uppercase }}
+                  </span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        <div class="actions" style="display: flex; flex-direction: column; gap: 15px; margin-top: 30px;">
+          <button 
+            class="btn btn-primary" 
+            style="width: 100%;"
+            (click)="validarEntrada()" 
+            [disabled]="loading || ticketData.ticket.estado === 'usado'">
+            Validar Entrada (Cine)
+          </button>
+          
+          @if (ticketData.candy && ticketData.candy.length > 0) {
+            <button 
+              class="btn btn-accent" 
+              style="width: 100%; background-color: var(--color-accent-warm);"
+              (click)="entregarCandy()"
+              [disabled]="loading || ticketData.candy[0].estado === 'entregado'">
+              Marcar Comida Entregada
+            </button>
+          }
+          
+          <button class="btn btn-secondary" style="width: 100%;" (click)="limpiar()">Escanear Otro</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

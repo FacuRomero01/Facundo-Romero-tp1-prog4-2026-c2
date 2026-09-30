@@ -58,11 +58,22 @@ export class SupabaseService {
   async getMovies(): Promise<Movie[]> {
     const { data, error } = await this.client
       .from('peliculas')
-      .select('*')
+      .select('*, generos(nombre)')
       .eq('estado', 'cartelera');
       
     if (error) throw error;
     return data || [];
+  }
+
+  async getMovieById(id: string): Promise<Movie | null> {
+    const { data, error } = await this.client
+      .from('peliculas')
+      .select('*')
+      .eq('id', id)
+      .single();
+      
+    if (error && error.code !== 'PGRST116') throw error; // PGRST116 is not found
+    return data;
   }
 
   async getAllMovies(): Promise<Movie[]> {
@@ -140,5 +151,35 @@ export class SupabaseService {
       
     if (error) throw error;
     return data;
+  }
+  async validateTicket(qrCode: string): Promise<any> {
+    const { data: ticket, error } = await this.client
+      .from('tickets')
+      .select('*, funciones(peliculas(titulo, duracion_minutos), salas(nombre), fecha_hora)')
+      .eq('codigo_qr', qrCode)
+      .single();
+    if (error) throw new Error('Ticket no encontrado o inválido.');
+    
+    const { data: butacas } = await this.client
+      .from('butacas_ocupadas')
+      .select('*')
+      .eq('ticket_id', ticket.id);
+      
+    const { data: candy } = await this.client
+      .from('ticket_candy')
+      .select('*, candy_productos(nombre)')
+      .eq('ticket_id', ticket.id);
+      
+    return { ticket, butacas: butacas || [], candy: candy || [] };
+  }
+
+  async markTicketUsed(ticketId: string): Promise<void> {
+    const { error } = await this.client.from('tickets').update({ estado: 'usado' }).eq('id', ticketId);
+    if (error) throw error;
+  }
+
+  async markCandyDelivered(ticketId: string): Promise<void> {
+    const { error } = await this.client.from('ticket_candy').update({ estado: 'entregado' }).eq('ticket_id', ticketId);
+    if (error) throw error;
   }
 }

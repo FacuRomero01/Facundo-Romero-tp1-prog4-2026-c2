@@ -5,8 +5,14 @@
     </a>
   </div>
   <div class="navbar-menu">
-    <a routerLink="/home" routerLinkActive="active">Cartelera</a>
+    @if (!isLoginPage()) {
+      <a routerLink="/home" routerLinkActive="active">Cartelera</a>
+    }
     
+    @if (isEmpleado()) {
+      <a routerLink="/validador" routerLinkActive="active" style="color: var(--color-accent-warm);">Validador QR</a>
+    }
+
     @if (isAdmin()) {
       <a routerLink="/admin" routerLinkActive="active">Admin Panel</a>
     }

@@ -73,8 +73,12 @@ export class BookingService {
   }
 
   async createTicket(funcionId: string, seatsToReserve: Seat[], finalPrice: number, userId?: string) {
+    // Generar un código corto y amigable (ej. ABCD-1234)
+    const randomChars = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const randomNums = Math.floor(1000 + Math.random() * 9000);
+    const qrData = `${randomChars}-${randomNums}`;
+    
     // Inserto el ticket
-    const qrData = `TICKET-${funcionId}-${Date.now()}`;
     const { data: ticket, error: ticketError } = await this.supabase.client
       .from('tickets')
       .insert({

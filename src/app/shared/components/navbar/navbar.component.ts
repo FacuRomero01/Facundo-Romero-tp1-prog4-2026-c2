@@ -15,6 +15,7 @@ export class NavbarComponent implements OnInit {
 
   isLoggedIn = signal(false);
   isAdmin = signal(false);
+  isEmpleado = signal(false);
 
   async ngOnInit() {
     const { data } = await this.supabase.auth.getSession();
@@ -30,13 +31,19 @@ export class NavbarComponent implements OnInit {
     if (session?.user?.id) {
       const profile = await this.supabase.getProfile(session.user.id);
       this.isAdmin.set(profile?.rol === 'admin');
+      this.isEmpleado.set(profile?.rol === 'empleado' || profile?.rol === 'admin');
     } else {
       this.isAdmin.set(false);
+      this.isEmpleado.set(false);
     }
   }
 
   async logout() {
     await this.supabase.signOut();
     this.router.navigate(['/login']);
+  }
+
+  isLoginPage(): boolean {
+    return this.router.url.includes('/login') || this.router.url.includes('/register');
   }
 }

@@ -39,7 +39,7 @@
   padding-bottom: 20px;
   display: flex;
   justify-content: center;
-  overflow: hidden; /* Evitar el scroll horizontal */
+  overflow-x: auto;
 }
 
 .seats-grid {
@@ -210,3 +210,17 @@
     letter-spacing: 1px;
   }
 }
+
+@media (max-width: 768px) {
+  .seats-grid {
+    width: max-content;
+    min-width: 100%;
+    margin: 0 auto;
+  }
+  .seat {
+    flex: 0 0 auto;
+    width: 24px;
+    max-width: none;
+  }
+}
+

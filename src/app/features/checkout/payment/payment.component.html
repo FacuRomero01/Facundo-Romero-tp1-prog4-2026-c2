@@ -64,6 +64,11 @@
             <span class="credit-amount">{{ userCredits | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
           </label>
         </div>
+      } @else {
+        <div class="discount-section text-center" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <p class="text-muted" style="margin-bottom: 10px; font-size: 0.9rem;">Estás comprando como <strong style="color: var(--color-primary);">Invitado</strong>.</p>
+          <a routerLink="/login" class="btn btn-outline btn-sm" style="font-size: 0.8rem;">Iniciá sesión para usar cupones y ganar puntos</a>
+        </div>
       }
 
       <div class="summary-row final-total">
@@ -82,10 +87,11 @@
         <p class="text-muted">Presentá este código QR en el ingreso de la sala.</p>
       </div>
       
-      <div class="qr-container">
+      <div class="qr-container" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
         <div class="qr-frame">
           <img [src]="qrCodeUrl" alt="Código QR de la Entrada">
         </div>
+        <p class="text-accent" style="margin-top: 15px; font-size: 1.5rem; font-weight: 700; letter-spacing: 2px;">{{ ticketCode }}</p>
       </div>
       
       <div class="ticket-details">

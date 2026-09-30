@@ -154,4 +154,11 @@
   .step-content {
     padding: 20px 15px;
   }
+
+  .movie-info-card {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center;
+  }
 }
+

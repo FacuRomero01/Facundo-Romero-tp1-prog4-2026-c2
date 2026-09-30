@@ -23,22 +23,68 @@ export class BookingFlowComponent implements OnInit {
 
   currentStep = 1;
   funciones: any[] = [];
+  pelicula: any = null;
   peliculaId!: string;
   selectedFuncionId: string | null = null;
+  
+  resenas: any[] = [];
+  paginatedResenas: any[] = [];
+  resenasCurrentPage = 1;
+  resenasPageSize = 3;
+  promedioEstrellas = 0;
+  totalResenas = 0;
 
   async ngOnInit() {
     this.peliculaId = this.route.snapshot.paramMap.get('funcionId') || ''; 
-    console.log('ID de película recibido en la URL:', this.peliculaId);
     
     if (this.peliculaId) {
       try {
+        this.pelicula = await this.supabase.getMovieById(this.peliculaId);
         this.funciones = await this.supabase.getFunciones(this.peliculaId);
-        console.log('Funciones encontradas en DB:', this.funciones);
+        
+        // Fetch reviews
+        const { data: resenasData } = await this.supabase.client
+          .from('resenas')
+          .select('*, perfiles(nombre, apellido)')
+          .eq('pelicula_id', this.peliculaId)
+          .order('fecha', { ascending: false });
+
+        if (resenasData && resenasData.length > 0) {
+          this.resenas = resenasData;
+          this.totalResenas = resenasData.length;
+          const suma = resenasData.reduce((acc, r) => acc + (r.puntuacion || 0), 0);
+          this.promedioEstrellas = suma / this.totalResenas;
+          this.updateResenasPagination();
+        }
+
         this.cdr.detectChanges();
       } catch(e) {
         console.error('Error al buscar funciones:', e);
       }
     }
+  }
+
+  updateResenasPagination() {
+    const startIndex = (this.resenasCurrentPage - 1) * this.resenasPageSize;
+    this.paginatedResenas = this.resenas.slice(startIndex, startIndex + this.resenasPageSize);
+  }
+
+  nextResenasPage() {
+    if (this.resenasCurrentPage * this.resenasPageSize < this.totalResenas) {
+      this.resenasCurrentPage++;
+      this.updateResenasPagination();
+    }
+  }
+
+  prevResenasPage() {
+    if (this.resenasCurrentPage > 1) {
+      this.resenasCurrentPage--;
+      this.updateResenasPagination();
+    }
+  }
+
+  get totalResenasPages(): number {
+    return Math.ceil(this.totalResenas / this.resenasPageSize);
   }
 
   seleccionarFuncion(funcion: any) {

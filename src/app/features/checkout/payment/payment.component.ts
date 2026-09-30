@@ -35,6 +35,7 @@ export class PaymentComponent implements OnInit {
   ageError = '';
   isPaid = signal(false);
   qrCodeUrl = '';
+  ticketCode = '';
   isProcessing = false;
 
   finalCost = computed(() => {
@@ -52,7 +53,7 @@ export class PaymentComponent implements OnInit {
       if (this.userProfile) {
         this.userCredits = this.userProfile.credito || 0;
         await this.checkAgeRestriction();
-        this.cdr.detectChanges(); // <-- Ponytail fix: Forzar update de la vista
+        this.cdr.detectChanges(); 
       }
     }
   }
@@ -112,7 +113,7 @@ export class PaymentComponent implements OnInit {
     }
 
     this.discountPercent.set(cupon.porcentaje_descuento);
-    this.cdr.detectChanges(); // <-- Ponytail fix: Forzar update de la vista
+    this.cdr.detectChanges();
   }
 
   toggleCredits() { this.useCredits.set(!this.useCredits()); }
@@ -144,6 +145,7 @@ export class PaymentComponent implements OnInit {
       }
 
       this.isPaid.set(true);
+      this.ticketCode = qrDataStr;
       this.qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrDataStr)}`;
     } catch (e) {
       console.error(e);

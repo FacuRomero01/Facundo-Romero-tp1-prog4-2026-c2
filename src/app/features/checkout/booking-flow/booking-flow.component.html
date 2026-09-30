@@ -34,9 +34,10 @@
   <div class="step-content neon-card">
     @if (currentStep === 1) {
       <div class="date-time-selection">
-        <h3 class="text-center" style="margin-bottom: 30px;">Seleccioná el horario</h3>
         
-        <div class="funciones-grid">
+        <!-- 1. Funciones Disponibles -->
+        <h3 class="text-center" style="margin-bottom: 30px; color: var(--color-primary);">Seleccioná el horario</h3>
+        <div class="funciones-grid" style="margin-bottom: 50px;">
           @for (funcion of funciones; track funcion.id) {
             <div class="funcion-card" (click)="seleccionarFuncion(funcion)">
               <div class="funcion-date">
@@ -53,10 +54,63 @@
             </div>
           } @empty {
             <div class="empty-state text-center" style="grid-column: 1 / -1; padding: 40px;">
-              <p class="text-muted">No hay funciones programadas para esta película.</p>
+              <p class="text-muted">No hay funciones programadas para esta película en este momento.</p>
             </div>
           }
         </div>
+
+        <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 40px 0;"></div>
+
+        <!-- 2. Info de la Película -->
+        @if (pelicula) {
+          <h3 style="margin-bottom: 20px; color: var(--color-accent);">Sobre la película</h3>
+          <div class="movie-info-card neon-card" style="display: flex; gap: 20px; margin-bottom: 30px; align-items: flex-start; background: rgba(0,0,0,0.2);">
+            <img [src]="pelicula.imagen_url || 'assets/placeholder.jpg'" [alt]="pelicula.titulo" style="width: 120px; border-radius: var(--radius-md); box-shadow: var(--shadow-surface);">
+            <div>
+              <h2 style="margin-bottom: 10px;">{{ pelicula.titulo }}</h2>
+              <div style="display: flex; gap: 10px; margin-bottom: 15px; font-size: 0.85rem; flex-wrap: wrap;">
+                <span class="badge badge-outline">{{ pelicula.duracion_minutos }} min</span>
+                <span class="badge badge-outline text-accent">{{ pelicula.restriccion_edad }}</span>
+                @if (pelicula.generos && pelicula.generos.length > 0) {
+                  @for (g of pelicula.generos; track g.nombre) {
+                    <span class="badge badge-outline" style="border-color: rgba(255, 255, 255, 0.3);">{{ g.nombre }}</span>
+                  }
+                }
+                @if (totalResenas > 0) {
+                  <span class="badge badge-primary"><i class="icon-star"></i> {{ promedioEstrellas | number:'1.1-1' }} / 5 ({{ totalResenas }})</span>
+                }
+              </div>
+              <p class="text-muted" style="font-size: 0.95rem; line-height: 1.5;">{{ pelicula.sinopsis }}</p>
+            </div>
+          </div>
+          
+          <!-- 3. Reseñas (Paginadas) -->
+          @if (resenas.length > 0) {
+            <h3 style="margin-bottom: 20px; color: var(--color-primary);">Reseñas de la comunidad</h3>
+            <div class="reviews-section neon-card" style="margin-bottom: 30px; background: rgba(0,0,0,0.1); padding: 25px;">
+              
+              <div class="reviews-list">
+                @for (resena of paginatedResenas; track resena.id) {
+                  <div style="margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                      <span style="font-weight: bold; font-size: 1rem; color: var(--color-text);">{{ resena.perfiles?.nombre }} {{ resena.perfiles?.apellido }}</span>
+                      <span style="color: var(--color-primary); font-size: 1rem;">{{ '★'.repeat(resena.puntuacion) }}{{ '☆'.repeat(5 - resena.puntuacion) }}</span>
+                    </div>
+                    <p class="text-muted" style="font-size: 0.95rem; margin: 0; font-style: italic; line-height: 1.5;">"{{ resena.comentario }}"</p>
+                  </div>
+                }
+              </div>
+              
+              @if (totalResenas > resenasPageSize) {
+                <div class="pagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 10px;">
+                  <button class="btn btn-outline btn-sm" (click)="prevResenasPage()" [disabled]="resenasCurrentPage === 1">Anterior</button>
+                  <span class="text-muted" style="font-size: 0.9rem;">Página {{ resenasCurrentPage }} de {{ totalResenasPages }}</span>
+                  <button class="btn btn-outline btn-sm" (click)="nextResenasPage()" [disabled]="resenasCurrentPage === totalResenasPages">Siguiente</button>
+                </div>
+              }
+            </div>
+          }
+        }
       </div>
     }
 

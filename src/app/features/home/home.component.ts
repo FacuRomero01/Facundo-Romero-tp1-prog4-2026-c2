@@ -16,18 +16,32 @@ export class HomeComponent implements OnInit {
 
   topMovies: Movie[] = [];
   allMovies: Movie[] = [];
-  filteredMovies: Movie[] = []; // Nueva variable para mostrar las filtradas
-  heroMovie: Movie | null = null; // Pelicula destacada en el hero
+  filteredMovies: Movie[] = []; 
+  heroMovie: Movie | null = null; 
+
+  // Variables para filtros
+  allGenres: string[] = [];
+  selectedGenre: string = '';
+  searchTerm: string = '';
 
   async ngOnInit() {
     try {
       this.topMovies = await this.supabaseService.getTopSellingMovies();
       this.allMovies = await this.supabaseService.getMovies();
       
-      // Al inicio, las películas filtradas son todas
+      // Extraer géneros únicos de las películas traídas
+      const genresSet = new Set<string>();
+      this.allMovies.forEach(movie => {
+        if (movie.generos && Array.isArray(movie.generos)) {
+          movie.generos.forEach(g => {
+            if (g.nombre) genresSet.add(g.nombre);
+          });
+        }
+      });
+      this.allGenres = Array.from(genresSet).sort();
+      
       this.filteredMovies = [...this.allMovies];
 
-      // El hero será el último estreno (la fecha más reciente)
       if (this.allMovies.length > 0) {
         this.heroMovie = [...this.allMovies].sort((peliculaA, peliculaB) => 
           new Date(peliculaB.fecha_estreno).getTime() - new Date(peliculaA.fecha_estreno).getTime()
@@ -39,25 +53,35 @@ export class HomeComponent implements OnInit {
       this.cdr.detectChanges();
     } catch (error) {
       console.error('Error cargando películas:', error);
-      const mockMovie: Movie = {
-        id: '1', titulo: 'Spider-Man 4', sinopsis: 'Acción', 
-        duracion_minutos: 120, imagen_url: '', restriccion_edad: 'ATP', 
-        estado: 'cartelera', fecha_estreno: '2026-01-01'
-      };
-      this.topMovies = [mockMovie, {...mockMovie, id: '2', titulo: 'Inception 2'}];
-      this.allMovies = this.topMovies;
-      this.filteredMovies = [...this.allMovies];
-      this.heroMovie = this.allMovies[0];
-      this.cdr.detectChanges();
     }
   }
 
   onSearch(event: Event) {
-    const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
-    
-    // Filtramos la lista original (allMovies) buscando coincidencias en el título
-    this.filteredMovies = this.allMovies.filter(movie => 
-      movie.titulo.toLowerCase().includes(searchTerm)
-    );
+    this.searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
+    this.applyFilters();
+  }
+
+  onGenreChange(event: Event) {
+    this.selectedGenre = (event.target as HTMLSelectElement).value;
+    this.applyFilters();
+  }
+
+  applyFilters() {
+    this.filteredMovies = this.allMovies.filter(movie => {
+      // 1. Filtro por nombre
+      const matchesName = movie.titulo.toLowerCase().includes(this.searchTerm);
+      
+      // 2. Filtro por género
+      let matchesGenre = true;
+      if (this.selectedGenre !== '') {
+        if (movie.generos && Array.isArray(movie.generos)) {
+          matchesGenre = movie.generos.some(g => g.nombre === this.selectedGenre);
+        } else {
+          matchesGenre = false; // Si seleccionó género pero la peli no tiene
+        }
+      }
+
+      return matchesName && matchesGenre;
+    });
   }
 }

@@ -9,6 +9,11 @@
           <span class="badge badge-primary">Último Estreno</span>
           <span class="badge badge-outline">{{ heroMovie.restriccion_edad }}</span>
           <span class="badge badge-outline">{{ heroMovie.duracion_minutos }} min</span>
+          @if (heroMovie.generos) {
+            @for (g of heroMovie.generos; track g.nombre) {
+              <span class="badge badge-outline">{{ g.nombre }}</span>
+            }
+          }
         </div>
         <h1 class="hero-title glow-text">{{ heroMovie.titulo }}</h1>
         <p class="hero-description">{{ heroMovie.sinopsis || 'Vive la mejor experiencia cinematográfica en nuestras salas premium con sonido envolvente y pantallas de última generación.' }}</p>
@@ -42,6 +47,13 @@
                 <span class="meta-dot">•</span>
                 <span class="meta-item text-accent">{{ movie.restriccion_edad }}</span>
               </div>
+              @if (movie.generos && movie.generos.length > 0) {
+                <div class="movie-genres" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">
+                  @for (g of movie.generos; track g.nombre) {
+                    <span class="badge badge-outline" style="font-size: 0.65rem; padding: 2px 6px;">{{ g.nombre }}</span>
+                  }
+                </div>
+              }
             </div>
           </div>
         } @empty {
@@ -55,12 +67,19 @@
         <h2 class="section-title">
           <span class="neon-line"></span> En Cartelera
         </h2>
-        <div class="search-box">
+        <div class="search-box" style="display: flex; gap: 15px; max-width: 500px; width: 100%;">
           <input 
             type="text" 
             class="form-control" 
             placeholder="Buscar película..." 
             (input)="onSearch($event)">
+            
+          <select class="form-control" (change)="onGenreChange($event)">
+            <option value="">Todos los géneros</option>
+            @for (genre of allGenres; track genre) {
+              <option [value]="genre">{{ genre }}</option>
+            }
+          </select>
         </div>
       </div>
       
@@ -80,6 +99,13 @@
                 <span class="meta-dot">•</span>
                 <span class="meta-item text-accent">{{ movie.restriccion_edad }}</span>
               </div>
+              @if (movie.generos && movie.generos.length > 0) {
+                <div class="movie-genres" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">
+                  @for (g of movie.generos; track g.nombre) {
+                    <span class="badge badge-outline" style="font-size: 0.65rem; padding: 2px 6px;">{{ g.nombre }}</span>
+                  }
+                </div>
+              }
             </div>
           </div>
         } @empty {
