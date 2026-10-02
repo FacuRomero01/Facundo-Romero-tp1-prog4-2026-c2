@@ -18,9 +18,26 @@ export class PaymentComponent implements OnInit {
   private supabase = inject(SupabaseService);
   private cdr = inject(ChangeDetectorRef);
 
-  basePrice = 4500;
+  basePrice = computed(() => {
+    const funcion = this.bookingService.selectedFuncion();
+    if (!funcion) return 4500;
+    
+    // Check if presale applies
+    const movie = funcion.peliculas; // if fetched with peliculas(precio_preventa, fecha_estreno)
+    // We might not have that joined properly, let's just use what's passed or default
+    if (movie?.precio_preventa) {
+       const today = new Date();
+       const release = new Date(movie.fecha_estreno);
+       const diff = Math.ceil((release.getTime() - today.getTime()) / (1000 * 3600 * 24));
+       if (diff > 0 && diff <= 7) {
+         return movie.precio_preventa;
+       }
+    }
+    return funcion.precio_base || 4500;
+  });
+  
   selectedSeats = computed(() => this.bookingService.seats().filter(asiento => asiento.status === 'selected'));
-  ticketsCost = computed(() => this.selectedSeats().reduce((total, asiento) => total + (this.basePrice * asiento.priceMultiplier), 0));
+  ticketsCost = computed(() => this.selectedSeats().reduce((total, asiento) => total + (this.basePrice() * asiento.priceMultiplier), 0));
   candyCost = computed(() => this.bookingService.candyItems().reduce((total, productoCandy) => total + (productoCandy.price * productoCandy.quantity), 0));
   totalCost = computed(() => this.ticketsCost() + this.candyCost());
 

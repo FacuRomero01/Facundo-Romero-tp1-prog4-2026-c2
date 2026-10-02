@@ -62,6 +62,49 @@
       </div>
     </section>
 
+    <!-- SECCIÓN PRÓXIMAMENTE -->
+    <section class="upcoming-movies" style="margin-top: 3rem;">
+      <h2 class="section-title">
+        <span class="neon-line"></span> Próximamente
+      </h2>
+      <div class="movies-grid">
+        @for (movie of upcomingMovies; track movie.id) {
+          <div class="movie-card neon-card">
+            <div class="movie-poster">
+              <img [src]="movie.imagen_url || 'assets/placeholder.jpg'" [alt]="movie.titulo">
+              <div class="poster-overlay">
+                @if (isPresaleAvailable(movie)) {
+                  <span class="btn btn-primary btn-sm" [routerLink]="['/checkout', movie.id]">Comprar Preventa</span>
+                } @else {
+                  <span class="btn btn-secondary btn-sm" (click)="subscribeToAlert(movie)">Notificarme</span>
+                }
+              </div>
+            </div>
+            <div class="movie-info">
+              <h3>{{ movie.titulo }}</h3>
+              <div class="movie-meta">
+                <span class="meta-item">Estreno: {{ movie.fecha_estreno | date:'dd/MM' }}</span>
+              </div>
+              @if (isPresaleAvailable(movie)) {
+                <div class="movie-meta" style="margin-top: 5px; color: #ff0055;">
+                  <span class="meta-item">Precio preventa: ${{ movie.precio_preventa }}</span>
+                </div>
+              }
+              @if (movie.generos && movie.generos.length > 0) {
+                <div class="movie-genres" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">
+                  @for (g of movie.generos; track g.nombre) {
+                    <span class="badge badge-outline" style="font-size: 0.65rem; padding: 2px 6px;">{{ g.nombre }}</span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        } @empty {
+          <p class="text-muted">No hay estrenos próximos anunciados.</p>
+        }
+      </div>
+    </section>
+
     <section class="all-movies">
       <div class="section-header flex-between">
         <h2 class="section-title">

@@ -17,7 +17,7 @@
         @for (asiento of selectedSeats(); track asiento.id) {
           <div class="summary-row">
             <span class="item-name">Butaca {{ asiento.id }} <span class="badge badge-outline">{{ asiento.type }}</span></span>
-            <span class="item-price">{{ basePrice * asiento.priceMultiplier | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+            <span class="item-price">{{ basePrice() * asiento.priceMultiplier | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
           </div>
         }
         @empty {

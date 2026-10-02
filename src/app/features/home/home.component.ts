@@ -2,20 +2,26 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { SupabaseService } from '../../core/services/supabase.service';
 import { Movie } from '../../shared/models';
 import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
+
+import { SwPush } from '@angular/service-worker';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, CommonModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit {
   private supabaseService = inject(SupabaseService);
   private cdr = inject(ChangeDetectorRef);
+  private swPush = inject(SwPush, { optional: true });
 
   topMovies: Movie[] = [];
   allMovies: Movie[] = [];
+  upcomingMovies: Movie[] = [];
   filteredMovies: Movie[] = []; 
   heroMovie: Movie | null = null; 
 
@@ -28,6 +34,7 @@ export class HomeComponent implements OnInit {
     try {
       this.topMovies = await this.supabaseService.getTopSellingMovies();
       this.allMovies = await this.supabaseService.getMovies();
+      this.upcomingMovies = await this.supabaseService.getUpcomingMovies();
       
       // Extraer géneros únicos de las películas traídas
       const genresSet = new Set<string>();
@@ -54,6 +61,47 @@ export class HomeComponent implements OnInit {
     } catch (error) {
       console.error('Error cargando películas:', error);
     }
+  }
+
+  async subscribeToAlert(movie: Movie) {
+    if (!this.swPush) {
+      alert('Las notificaciones no están soportadas en tu navegador.');
+      return;
+    }
+    const daysUntilRelease = this.getDaysUntil(movie.fecha_estreno);
+    if (daysUntilRelease <= 7) {
+      alert('¡La preventa ya está disponible o el estreno es en menos de 7 días!');
+      return;
+    }
+
+    try {
+      if (!movie.id) {
+        throw new Error('La película no tiene un ID válido.');
+      }
+      const sub = await this.swPush.requestSubscription({
+        serverPublicKey: environment.vapidPublicKey
+      });
+      await this.supabaseService.savePushSubscription(sub);
+      await this.supabaseService.subscribeToPresaleAlert(movie.id);
+      alert('¡Te suscribiste! Te avisaremos cuando empiece la preventa.');
+    } catch (err) {
+      console.error('No se pudo suscribir a notificaciones', err);
+      alert('Hubo un error al suscribirse a las notificaciones.');
+    }
+  }
+
+  isPresaleAvailable(movie: Movie): boolean {
+    if (movie.precio_preventa && this.getDaysUntil(movie.fecha_estreno) <= 7) {
+      return true;
+    }
+    return false;
+  }
+
+  getDaysUntil(dateStr: string): number {
+    const today = new Date();
+    const release = new Date(dateStr);
+    const diff = release.getTime() - today.getTime();
+    return Math.ceil(diff / (1000 * 3600 * 24));
   }
 
   onSearch(event: Event) {

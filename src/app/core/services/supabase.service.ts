@@ -134,7 +134,7 @@ export class SupabaseService {
   async getFunciones(peliculaId: string): Promise<any[]> {
     const { data, error } = await this.client
       .from('funciones')
-      .select('*, salas(nombre), peliculas(titulo)')
+      .select('*, salas(nombre), peliculas(titulo, precio_preventa, fecha_estreno)')
       .eq('pelicula_id', peliculaId)
       .order('fecha_hora', { ascending: true });
       
@@ -182,4 +182,43 @@ export class SupabaseService {
     const { error } = await this.client.from('ticket_candy').update({ estado: 'entregado' }).eq('ticket_id', ticketId);
     if (error) throw error;
   }
+
+  async getUpcomingMovies(): Promise<Movie[]> {
+    const { data, error } = await this.client
+      .from('peliculas')
+      .select('*, generos(nombre)')
+      .eq('estado', 'proximamente');
+    if (error) throw error;
+    return data || [];
+  }
+
+  async subscribeToPresaleAlert(peliculaId: string): Promise<void> {
+    const session = await this.client.auth.getSession();
+    const userId = session.data.session?.user?.id;
+    if (!userId) throw new Error('Usuario no logueado');
+
+    const { error } = await this.client.from('alertas_estrenos').insert({
+      usuario_id: userId,
+      pelicula_id: peliculaId
+    });
+    if (error && error.code !== '23505') throw error; // Ignore unique constraint violation
+  }
+
+  async savePushSubscription(sub: any): Promise<void> {
+    const session = await this.client.auth.getSession();
+    const userId = session.data.session?.user?.id;
+    if (!userId) return;
+
+    // Convert the PushSubscription to JSON to safely access keys
+    const subJSON = typeof sub.toJSON === 'function' ? sub.toJSON() : sub;
+    
+    const { error } = await this.client.from('push_subscriptions').upsert({
+      usuario_id: userId,
+      endpoint: subJSON.endpoint,
+      p256dh: subJSON.keys?.p256dh || '',
+      auth: subJSON.keys?.auth || ''
+    }, { onConflict: 'endpoint' });
+    if (error) throw error;
+  }
 }
+
