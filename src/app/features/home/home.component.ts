@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { SupabaseService } from '../../core/services/supabase.service';
+import { ToastService } from '../../core/services/toast.service';
 import { Movie } from '../../shared/models';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -16,6 +17,7 @@ import { environment } from '../../../environments/environment';
 })
 export class HomeComponent implements OnInit {
   private supabaseService = inject(SupabaseService);
+  private toastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
   private swPush = inject(SwPush, { optional: true });
 
@@ -65,12 +67,12 @@ export class HomeComponent implements OnInit {
 
   async subscribeToAlert(movie: Movie) {
     if (!this.swPush) {
-      alert('Las notificaciones no están soportadas en tu navegador.');
+      this.toastService.show('Las notificaciones no están soportadas en tu navegador.', 'warning');
       return;
     }
     const daysUntilRelease = this.getDaysUntil(movie.fecha_estreno);
     if (daysUntilRelease <= 7) {
-      alert('¡La preventa ya está disponible o el estreno es en menos de 7 días!');
+      this.toastService.show('¡La preventa ya está disponible o el estreno es inminente!', 'info');
       return;
     }
 
@@ -83,10 +85,10 @@ export class HomeComponent implements OnInit {
       });
       await this.supabaseService.savePushSubscription(sub);
       await this.supabaseService.subscribeToPresaleAlert(movie.id);
-      alert('¡Te suscribiste! Te avisaremos cuando empiece la preventa.');
+      this.toastService.show('¡Te suscribiste! Te avisaremos cuando empiece la preventa.', 'success');
     } catch (err) {
       console.error('No se pudo suscribir a notificaciones', err);
-      alert('Hubo un error al suscribirse a las notificaciones.');
+      this.toastService.show('Hubo un error al suscribirse a las notificaciones.', 'error');
     }
   }
 

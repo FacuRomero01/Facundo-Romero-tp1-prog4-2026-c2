@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { BookingService, CheckoutPayload } from '../../../core/services/booking.service';
 import { SupabaseService } from '../../../core/services/supabase.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { SpanishDatePipe } from '../../../shared/pipes/spanish-date.pipe';
 
 @Component({
@@ -14,6 +15,7 @@ import { SpanishDatePipe } from '../../../shared/pipes/spanish-date.pipe';
   styleUrl: './payment.component.scss'
 })
 export class PaymentComponent implements OnInit {
+  private toast = inject(ToastService);
   @Input() purchaseType: 'normal' | 'combo' | null = null;
   @Input() entradasDinero: number = 0;
   @Input() entradasPuntos: number = 0;
@@ -153,7 +155,7 @@ export class PaymentComponent implements OnInit {
 
   toggleCredits() { 
     if (this.purchaseType === 'combo') {
-      alert('Los combos no pueden pagarse con créditos.');
+      this.toast.show('Los combos no pueden pagarse con créditos.', 'warning');
       return;
     }
     this.useCredits.set(!this.useCredits()); 
@@ -195,7 +197,7 @@ export class PaymentComponent implements OnInit {
       this.qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrDataStr)}`;
     } catch (e) {
       console.error(e);
-      alert('Error procesando pago.');
+      this.toast.show('Error procesando pago.', 'error');
     } finally {
       this.isProcessing = false;
       this.cdr.detectChanges();

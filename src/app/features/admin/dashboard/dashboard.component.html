@@ -72,73 +72,77 @@
         <button class="btn btn-primary btn-sm" (click)="abrirFormulario()">+ Nueva Película</button>
       </div>
 
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Póster</th>
-            <th>Título</th>
-            <th>Duración</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (movie of movies; track movie.id) {
+      <div class="table-container">
+        <table class="neon-table">
+          <thead>
             <tr>
-              <td>
-                <img [src]="movie.imagen_url || 'assets/placeholder.jpg'" alt="Poster" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;">
-              </td>
-              <td>{{ movie.titulo }}</td>
-              <td>{{ movie.duracion_minutos }} min</td>
-              <td>
-                <span class="badge" [class.badge-primary]="movie.estado === 'cartelera'" [class.badge-outline]="movie.estado !== 'cartelera'">
-                  {{ movie.estado | titlecase }}
-                </span>
-              </td>
-              <td>
-                <div class="action-buttons">
-                  <button class="btn btn-secondary btn-sm" (click)="editarPelicula(movie)">Editar</button>
-                  <button class="btn btn-outline btn-sm" (click)="cambiarEstado(movie)">Cambiar Estado</button>
-                </div>
-              </td>
+              <th>Póster</th>
+              <th>Título</th>
+              <th>Duración</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (movie of movies; track movie.id) {
+              <tr>
+                <td>
+                  <img [src]="movie.imagen_url || 'assets/placeholder.jpg'" alt="Poster" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;">
+                </td>
+                <td>{{ movie.titulo }}</td>
+                <td>{{ movie.duracion_minutos }} min</td>
+                <td>
+                  <span class="badge" [class.badge-primary]="movie.estado === 'cartelera'" [class.badge-outline]="movie.estado !== 'cartelera'">
+                    {{ movie.estado | titlecase }}
+                  </span>
+                </td>
+                <td>
+                  <div class="flex-center" style="gap: 10px; justify-content: flex-start;">
+                    <button class="btn btn-secondary btn-sm" (click)="editarPelicula(movie)">Editar</button>
+                    <button class="btn btn-outline btn-sm" (click)="cambiarEstado(movie)">Cambiar Estado</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   }
 
   @if (currentTab === 'funciones') {
     <div class="admin-content neon-card">
-      <div class="flex-between" style="margin-bottom: 20px;">
+      <div class="flex-between mb-2">
         <h3>Agenda de Funciones (Salas)</h3>
         <button class="btn btn-primary btn-sm" (click)="abrirFormularioFuncion()">+ Crear Función</button>
       </div>
 
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Fecha y Hora</th>
-            <th>Película</th>
-            <th>Sala (Asignación Auto)</th>
-            <th>Formato e Idioma</th>
-            <th>Precio Base</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (f of funciones; track f.id) {
+      <div class="table-container">
+        <table class="neon-table">
+          <thead>
             <tr>
-              <td>{{ f.fecha_hora | spanishDate:'short' }}</td>
-              <td style="font-weight: bold; color: var(--color-primary);">{{ f.peliculas?.titulo }}</td>
-              <td><span class="badge badge-outline">{{ f.salas?.nombre }}</span></td>
-              <td>{{ f.formato }} - {{ f.idioma }}</td>
-              <td>${{ f.precio_base }}</td>
+              <th>Fecha y Hora</th>
+              <th>Película</th>
+              <th>Sala (Asignación Auto)</th>
+              <th>Formato e Idioma</th>
+              <th>Precio Base</th>
             </tr>
-          } @empty {
-            <tr><td colspan="5" class="text-center text-muted">No hay funciones programadas.</td></tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (f of funciones; track f.id) {
+              <tr>
+                <td>{{ f.fecha_hora | spanishDate:'short' }}</td>
+                <td style="font-weight: bold; color: var(--color-primary);">{{ f.peliculas?.titulo }}</td>
+                <td><span class="badge badge-outline">{{ f.salas?.nombre }}</span></td>
+                <td>{{ f.formato }} - {{ f.idioma }}</td>
+                <td>${{ f.precio_base }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="text-center text-muted">No hay funciones programadas.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   }
 </div>
@@ -146,27 +150,30 @@
 <!-- Modal Película -->
 @if (showMovieForm) {
   <div class="modal-overlay">
-    <div class="modal-content neon-card" style="padding: 30px;">
-      <h3 style="margin-bottom: 20px; color: var(--color-primary);">{{ newMovie.id ? 'Editar' : 'Nueva' }} Película</h3>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="text-primary">{{ newMovie.id ? 'Editar' : 'Nueva' }} Película</h3>
+        <button class="close-btn" (click)="cerrarFormulario()">×</button>
+      </div>
       
       <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label>Título</label>
+          <label class="form-label">Título</label>
           <input type="text" class="form-control" [(ngModel)]="newMovie.titulo">
         </div>
         
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label>Sinopsis</label>
+          <label class="form-label">Sinopsis</label>
           <textarea class="form-control" rows="3" [(ngModel)]="newMovie.sinopsis"></textarea>
         </div>
         
         <div class="form-group">
-          <label>Duración (min)</label>
+          <label class="form-label">Duración (min)</label>
           <input type="number" class="form-control" [(ngModel)]="newMovie.duracion_minutos">
         </div>
         
         <div class="form-group">
-          <label>Restricción Edad</label>
+          <label class="form-label">Restricción Edad</label>
           <select class="form-control" [(ngModel)]="newMovie.restriccion_edad">
             <option value="ATP">ATP</option>
             <option value="+13">+13</option>
@@ -176,25 +183,25 @@
         </div>
         
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label>URL Imagen</label>
+          <label class="form-label">URL Imagen</label>
           <input type="text" class="form-control" [(ngModel)]="newMovie.imagen_url">
         </div>
         
         <div class="form-group">
-          <label>Fecha de Estreno</label>
+          <label class="form-label">Fecha de Estreno</label>
           <input type="date" class="form-control" [(ngModel)]="newMovie.fecha_estreno">
         </div>
 
         <div class="form-group">
-          <label>Precio de Preventa ($)</label>
+          <label class="form-label">Precio de Preventa ($)</label>
           <input type="number" class="form-control" [(ngModel)]="newMovie.precio_preventa">
         </div>
         
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label>Géneros</label>
+          <label class="form-label">Géneros</label>
           <div class="genres-checkboxes" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px;">
             @for (g of generosDisponibles; track g.id) {
-              <label style="display: flex; align-items: center; gap: 5px;">
+              <label style="display: flex; align-items: center; gap: 5px; font-size: 0.9rem; color: var(--color-text-secondary);">
                 <input type="checkbox" 
                        [value]="g.id" 
                        [checked]="newMovie.genero_ids?.includes(g.id)"
@@ -206,7 +213,7 @@
         </div>
       </div>
       
-      <div class="modal-actions" style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 10px;">
+      <div class="flex-between mt-2" style="justify-content: flex-end;">
         <button class="btn btn-secondary" (click)="cerrarFormulario()">Cancelar</button>
         <button class="btn btn-primary" (click)="guardarPelicula()">Guardar</button>
       </div>
@@ -217,13 +224,16 @@
 <!-- Modal Función -->
 @if (showFuncionForm) {
   <div class="modal-overlay">
-    <div class="modal-content neon-card" style="padding: 30px;">
-      <h3 style="margin-bottom: 20px; color: var(--color-primary);">Crear Nueva Función</h3>
-      <p class="text-muted" style="margin-bottom: 20px; font-size: 0.85rem;">La sala será asignada automáticamente por el sistema para evitar solapamientos.</p>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="text-primary">Crear Nueva Función</h3>
+        <button class="close-btn" (click)="cerrarFormularioFuncion()">×</button>
+      </div>
+      <p class="text-muted mb-2" style="font-size: 0.85rem;">La sala será asignada automáticamente por el sistema para evitar solapamientos.</p>
       
       <div class="form-grid" style="display: grid; grid-template-columns: 1fr; gap: 15px;">
         <div class="form-group">
-          <label>Película</label>
+          <label class="form-label">Película</label>
           <select class="form-control" [(ngModel)]="newFuncion.pelicula_id">
             @for (m of movies; track m.id) {
               <option [value]="m.id">{{ m.titulo }}</option>
@@ -232,13 +242,13 @@
         </div>
         
         <div class="form-group">
-          <label>Fecha y Hora</label>
+          <label class="form-label">Fecha y Hora</label>
           <input type="datetime-local" class="form-control" [(ngModel)]="newFuncion.fecha_hora">
         </div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
           <div class="form-group">
-            <label>Formato</label>
+            <label class="form-label">Formato</label>
             <select class="form-control" [(ngModel)]="newFuncion.formato">
               <option value="2D">2D</option>
               <option value="3D">3D</option>
@@ -248,7 +258,7 @@
           </div>
           
           <div class="form-group">
-            <label>Idioma</label>
+            <label class="form-label">Idioma</label>
             <select class="form-control" [(ngModel)]="newFuncion.idioma">
               <option value="Castellano">Castellano</option>
               <option value="Subtitulada">Subtitulada</option>
@@ -257,12 +267,12 @@
         </div>
         
         <div class="form-group">
-          <label>Precio Base ($)</label>
+          <label class="form-label">Precio Base ($)</label>
           <input type="number" class="form-control" [(ngModel)]="newFuncion.precio_base">
         </div>
       </div>
       
-      <div class="modal-actions" style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 10px;">
+      <div class="flex-between mt-2" style="justify-content: flex-end;">
         <button class="btn btn-secondary" (click)="cerrarFormularioFuncion()">Cancelar</button>
         <button class="btn btn-primary" (click)="guardarFuncion()">Crear Función</button>
       </div>

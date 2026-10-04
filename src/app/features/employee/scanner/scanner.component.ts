@@ -2,6 +2,7 @@ import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../../core/services/supabase.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-scanner',
@@ -12,6 +13,7 @@ import { SupabaseService } from '../../../core/services/supabase.service';
 })
 export class ScannerComponent {
   private supabase = inject(SupabaseService);
+  private toast = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
 
   qrCode: string = '';
@@ -44,9 +46,9 @@ export class ScannerComponent {
       this.loading = true;
       await this.supabase.markTicketUsed(this.ticketData.ticket.id);
       this.ticketData.ticket.estado = 'usado';
-      alert('Entrada validada correctamente.');
+      this.toast.show('Entrada validada correctamente.', 'success');
     } catch (e) {
-      alert('Error al validar la entrada.');
+      this.toast.show('Error al validar la entrada.', 'error');
     } finally {
       this.loading = false;
       this.cdr.detectChanges();
@@ -59,9 +61,9 @@ export class ScannerComponent {
       this.loading = true;
       await this.supabase.markCandyDelivered(this.ticketData.ticket.id);
       this.ticketData.candy.forEach((c: any) => c.estado = 'entregado');
-      alert('Comida entregada correctamente.');
+      this.toast.show('Comida entregada correctamente.', 'success');
     } catch (e) {
-      alert('Error al entregar la comida.');
+      this.toast.show('Error al entregar la comida.', 'error');
     } finally {
       this.loading = false;
       this.cdr.detectChanges();

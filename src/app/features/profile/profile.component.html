@@ -1,47 +1,49 @@
-<div class="main-container" style="max-width: 1000px; margin: 0 auto; padding-top: 40px; padding-bottom: 60px;">
+<div class="main-container">
   <h2 class="section-title">
     <span class="neon-line"></span> Mi Perfil
   </h2>
 
   @if (loading) {
-    <div class="text-center" style="padding: 40px;"><p>Cargando perfil...</p></div>
+    <div class="flex-center" style="min-height: 200px;"><p class="text-muted">Cargando perfil...</p></div>
   } @else {
     @if (userProfile) {
-      <div class="profile-header neon-card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;">
+      <div class="profile-header neon-card flex-between mb-2" style="flex-wrap: wrap; align-items: center;">
         <div>
-          <h3>{{ userProfile.nombre }} {{ userProfile.apellido }}</h3>
+          <h3 class="glow-text" style="font-size: 1.8rem;">{{ userProfile.nombre }} {{ userProfile.apellido }}</h3>
           <p class="text-muted">{{ userProfile.email }}</p>
         </div>
-        <div style="display: flex; gap: 20px;">
-          <div class="badge badge-outline" style="font-size: 1rem; padding: 10px 15px;">
-            <i class="icon-star" style="color: var(--color-primary);"></i> {{ userProfile.puntos }} Puntos
+        <div style="display: flex; gap: 15px;">
+          <div class="badge badge-outline" style="padding: 10px 15px;">
+            <i class="icon-star text-primary"></i> {{ userProfile.puntos }} Puntos
           </div>
-          <div class="badge badge-outline" style="font-size: 1rem; padding: 10px 15px; border-color: var(--color-success); color: var(--color-success);">
+          <div class="badge badge-success" style="padding: 10px 15px;">
             <i class="icon-wallet"></i> Saldo: ${{ userProfile.credito }}
           </div>
         </div>
       </div>
 
-      <div class="tickets-section">
-        <h3 style="margin-bottom: 20px; color: var(--color-accent);">Próximas Funciones</h3>
+      <div class="tickets-section mb-2">
+        <h3 class="text-accent mb-2">Próximas Funciones</h3>
         
-        <div class="movies-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+        <div class="movies-grid">
           @for (ticket of activeTickets; track ticket.id) {
             <div class="movie-card neon-card" [style.opacity]="ticket.estado === 'cancelado' ? '0.5' : '1'">
-              <div class="movie-info" style="padding-top: 15px;">
-                <h4 style="margin-bottom: 5px;">{{ ticket.funciones?.peliculas?.titulo }}</h4>
-                <p class="text-muted" style="font-size: 0.9rem;">{{ ticket.funciones?.fecha_hora | spanishDate:'short' }}</p>
-                <div style="margin-top: 10px;">
-                  <span class="badge badge-outline" [class.badge-primary]="ticket.estado === 'valido'">{{ ticket.estado | uppercase }}</span>
-                  <p style="margin-top: 10px; font-weight: bold;">Código: {{ ticket.codigo_qr }}</p>
+              <div class="movie-info">
+                <h4 class="mb-1">{{ ticket.funciones?.peliculas?.titulo }}</h4>
+                <p class="text-muted mb-1" style="font-size: 0.9rem;">{{ ticket.funciones?.fecha_hora | spanishDate:'short' }}</p>
+                <div class="mb-1">
+                  <span class="badge" [class.badge-primary]="ticket.estado === 'valido'" [class.badge-outline]="ticket.estado !== 'valido'">
+                    {{ ticket.estado | uppercase }}
+                  </span>
+                  <p class="mt-1" style="font-weight: bold; color: var(--color-text-secondary);">Código: {{ ticket.codigo_qr }}</p>
                 </div>
                 
                 @if (ticket.estado === 'valido' && canCancel(ticket.funciones?.fecha_hora)) {
-                  <button class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 15px;" (click)="cancelTicket(ticket)">
+                  <button class="btn btn-secondary btn-sm w-100 mt-2" (click)="cancelTicket(ticket)">
                     Cancelar y Devolver Crédito
                   </button>
                 } @else if (ticket.estado === 'valido') {
-                  <p class="text-error" style="font-size: 0.8rem; margin-top: 10px;">Ya no se puede cancelar (falta menos de 2 hs).</p>
+                  <p class="text-error mt-1" style="font-size: 0.8rem;">Ya no se puede cancelar (falta menos de 2 hs).</p>
                 }
               </div>
             </div>
@@ -51,8 +53,8 @@
         </div>
       </div>
 
-      <div class="tickets-section" style="margin-top: 50px;">
-        <h3 style="margin-bottom: 20px; color: var(--color-primary);">Mis Películas (Historial)</h3>
+      <div class="tickets-section mt-2">
+        <h3 class="text-primary mb-2">Mis Películas (Historial)</h3>
         
         <div class="movies-grid">
           @for (ticket of paginatedPastTickets; track ticket.id) {
@@ -91,7 +93,7 @@
         </div>
         
         @if (pastTickets.length > pageSize) {
-          <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 30px;">
+          <div class="pagination flex-center mt-2" style="gap: 20px;">
             <button class="btn btn-secondary btn-sm" (click)="prevPage()" [disabled]="currentPage === 1">Anterior</button>
             <span class="text-muted">Página {{ currentPage }} de {{ totalPages }}</span>
             <button class="btn btn-secondary btn-sm" (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente</button>

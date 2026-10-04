@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { SupabaseService } from '../../../core/services/supabase.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-register',
@@ -15,6 +16,7 @@ export class RegisterComponent {
   private fb = inject(FormBuilder);
   private supabase = inject(SupabaseService);
   private router = inject(Router);
+  private toast = inject(ToastService);
 
   registerForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -57,9 +59,9 @@ export class RegisterComponent {
       await this.supabase.signUp(email!, password!, profileData);
       
       const { data: cup } = await this.supabase.client.from('cupones').select('codigo, porcentaje_descuento').eq('tipo_restriccion', 'primera_compra').eq('activo', true).maybeSingle();
-      const cupText = cup ? `\n\nTu código de cupón de bienvenida es: ${cup.codigo} (${cup.porcentaje_descuento}% OFF). ¡Anotalo para tu primera compra!` : '';
+      const cupText = cup ? ` Tu código de cupón de bienvenida es: ${cup.codigo} (${cup.porcentaje_descuento}% OFF). ¡Anotalo para tu primera compra!` : '';
       
-      alert(`¡Registro exitoso!${cupText}`);
+      this.toast.show(`¡Registro exitoso!${cupText}`, 'success', 8000);
       this.router.navigate(['/home']);
     } catch (error: any) {
       this.errorMessage = error.message || 'Error al registrarse';

@@ -111,50 +111,50 @@
 
     @if (currentStep === 2) {
       <div class="ticket-selection-container">
-        <h3 class="text-center" style="margin-bottom: 20px;">¿Cómo querés comprar?</h3>
+        <h3 class="text-center mb-2">¿Cómo querés comprar?</h3>
         
-        <div class="purchase-types" style="display: flex; gap: 20px; justify-content: center; margin-bottom: 30px;">
-          <div class="type-card neon-card" [class.selected]="purchaseType === 'normal'" (click)="setPurchaseType('normal')" style="cursor:pointer; width:45%; text-align:center;">
+        <div class="purchase-types">
+          <div class="type-card neon-card" [class.selected]="purchaseType === 'normal'" (click)="setPurchaseType('normal')">
             <h4><i class="icon-ticket"></i> Armar mi Compra</h4>
             <p class="text-muted" style="font-size:0.9rem;">Elegí tus entradas (podés usar puntos) y pasá por el Candy Bar.</p>
           </div>
           
-          <div class="type-card neon-card" [class.selected]="purchaseType === 'combo'" (click)="setPurchaseType('combo')" style="cursor:pointer; width:45%; text-align:center;">
+          <div class="type-card neon-card" [class.selected]="purchaseType === 'combo'" (click)="setPurchaseType('combo')">
             <h4><i class="icon-star"></i> Combo Cerrado</h4>
             <p class="text-muted" style="font-size:0.9rem;">Entradas y Candy Bar con precio especial. (Solo con dinero)</p>
           </div>
         </div>
 
         @if (purchaseType === 'normal') {
-          <div class="normal-selection animate-fade-in" style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px;">
-            <h4 style="margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Seleccioná la cantidad de entradas</h4>
+          <div class="normal-selection animate-fade-in neon-card" style="background: rgba(0,0,0,0.2);">
+            <h4 class="mb-2" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Seleccioná la cantidad de entradas</h4>
             
-            <div class="ticket-row flex-between" style="margin-bottom: 15px;">
+            <div class="ticket-row flex-between">
               <div>
                 <strong>Entrada General</strong>
                 <div class="text-warm">{{ bookingService.selectedFuncion()?.precio_base | currency:'ARS':'symbol-narrow':'1.0-0' }}</div>
               </div>
-              <div class="candy-actions flex-between" style="min-width: 120px; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 5px;">
+              <div class="candy-actions flex-between">
                 <button class="btn-ctrl" (click)="decrementEntradas('dinero')" [disabled]="entradasDinero === 0">-</button>
                 <span class="quantity">{{ entradasDinero }}</span>
                 <button class="btn-ctrl add" (click)="incrementEntradas('dinero')">+</button>
               </div>
             </div>
 
-            <div class="ticket-row flex-between" style="margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+            <div class="ticket-row dashed-border flex-between">
               <div>
                 <strong>Canjear con Puntos</strong>
                 <div class="text-primary"><i class="icon-star"></i> {{ costoPuntoEntrada }} pts / u.</div>
                 <div class="text-muted" style="font-size: 0.8rem;">Tenés: {{ userPoints }} pts</div>
               </div>
-              <div class="candy-actions flex-between" style="min-width: 120px; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 5px;">
+              <div class="candy-actions flex-between">
                 <button class="btn-ctrl" (click)="decrementEntradas('puntos')" [disabled]="entradasPuntos === 0">-</button>
                 <span class="quantity text-primary">{{ entradasPuntos }}</span>
                 <button class="btn-ctrl add" (click)="incrementEntradas('puntos')" style="border-color: var(--color-primary); color: var(--color-primary)">+</button>
               </div>
             </div>
             
-            <div class="text-right" style="margin-top:20px;">
+            <div class="text-right mt-2">
               <span class="badge badge-outline">Total Entradas: {{ entradasDinero + entradasPuntos }}</span>
             </div>
           </div>
@@ -162,14 +162,14 @@
 
         @if (purchaseType === 'combo') {
           <div class="combo-selection animate-fade-in">
-            <h4 style="margin-bottom: 20px;">Combos Disponibles</h4>
-            <div class="combos-grid" style="display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+            <h4 class="mb-2">Combos Disponibles</h4>
+            <div class="combos-grid">
               @for (combo of combosActivos; track combo.id) {
-                <div class="combo-card neon-card" [class.selected]="selectedComboId === combo.id" (click)="selectCombo(combo.id)" style="cursor:pointer; border: 2px solid transparent;">
+                <div class="combo-card neon-card" [class.selected]="selectedComboId === combo.id" (click)="selectCombo(combo.id)">
                   <h5>{{ combo.titulo }}</h5>
                   <p class="text-muted" style="font-size:0.9rem;">{{ combo.descripcion }}</p>
                   
-                  <ul style="list-style: none; padding: 0; margin: 10px 0; font-size: 0.85rem; color: rgba(255,255,255,0.8);">
+                  <ul>
                     <li><i class="icon-ticket"></i> {{ combo.entradas_incluidas }} Entradas</li>
                     @for (item of combo.combo_candy_productos; track item.candy_productos.nombre) {
                       <li><i class="icon-popcorn"></i> {{ item.cantidad }}x {{ item.candy_productos.nombre }}</li>

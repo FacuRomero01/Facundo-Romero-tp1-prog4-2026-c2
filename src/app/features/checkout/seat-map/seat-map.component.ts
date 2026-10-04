@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BookingService, Seat } from '../../../core/services/booking.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-seat-map',
@@ -11,6 +12,7 @@ import { BookingService, Seat } from '../../../core/services/booking.service';
 })
 export class SeatMapComponent implements OnInit, OnDestroy {
   bookingService = inject(BookingService);
+  private toast = inject(ToastService);
   
   ngOnInit() {
     this.bookingService.generateSeatMap();
@@ -29,7 +31,7 @@ export class SeatMapComponent implements OnInit, OnDestroy {
          const currentlySelected = seats.filter(s => s.status === 'selected').length;
          const max = this.bookingService.maxSeats;
          if (max && currentlySelected >= max) {
-            alert('Ya seleccionaste todas las butacas correspondientes a tu compra.');
+            this.toast.show('Ya seleccionaste todas las butacas correspondientes a tu compra.', 'warning');
             return seats;
          }
       }

@@ -162,3 +162,117 @@
   }
 }
 
+
+/* ==========================================================================
+   TICKETS & COMBOS (Step 2)
+   ========================================================================== */
+.purchase-types {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.type-card {
+  cursor: pointer;
+  width: 45%;
+  text-align: center;
+  border: 2px solid transparent;
+  
+  &.selected {
+    border-color: var(--color-primary);
+    box-shadow: var(--glow-primary);
+    background-color: var(--color-surface-hover);
+  }
+}
+
+.ticket-row {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  
+  &.dashed-border {
+    border-top: 1px dashed rgba(255,255,255,0.1);
+    padding-top: 15px;
+  }
+}
+
+.candy-actions {
+  min-width: 120px;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-pill);
+  padding: 5px;
+  
+  .btn-ctrl {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: transparent;
+    color: var(--color-text);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    
+    &:hover:not(:disabled) {
+      background: rgba(255,255,255,0.1);
+    }
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    &.add {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+      &:hover:not(:disabled) {
+        background: rgba(0, 229, 255, 0.1);
+        box-shadow: var(--glow-accent);
+      }
+    }
+  }
+  
+  .quantity {
+    font-weight: 700;
+    font-size: 1.1rem;
+    width: 30px;
+    text-align: center;
+  }
+}
+
+.combos-grid {
+  display: grid;
+  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.combo-card {
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition-fast);
+  
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.8);
+    
+    li { margin-bottom: 5px; }
+  }
+  
+  &.selected {
+    border-color: var(--color-primary);
+    box-shadow: var(--glow-primary);
+    background-color: var(--color-surface-hover);
+  }
+}
+
+@media (max-width: 600px) {
+  .purchase-types {
+    flex-direction: column;
+    .type-card { width: 100%; }
+  }
+}

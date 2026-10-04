@@ -4,7 +4,7 @@
     <!-- HERO SECTION (Usando el último estreno como hero) -->
     <section class="hero-section" [style.backgroundImage]="'linear-gradient(to right, rgba(6, 5, 10, 0.95) 0%, rgba(6, 5, 10, 0.5) 50%, rgba(6, 5, 10, 0.95) 100%), url(' + (heroMovie.imagen_url || 'assets/placeholder.jpg') + ')'">
       <div class="hero-overlay"></div>
-      <div class="hero-content">
+      <div class="hero-content animate-slide-up">
         <div class="hero-badges">
           <span class="badge badge-primary">Último Estreno</span>
           <span class="badge badge-outline">{{ heroMovie.restriccion_edad }}</span>
@@ -48,9 +48,9 @@
                 <span class="meta-item text-accent">{{ movie.restriccion_edad }}</span>
               </div>
               @if (movie.generos && movie.generos.length > 0) {
-                <div class="movie-genres" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">
+                <div class="movie-genres">
                   @for (g of movie.generos; track g.nombre) {
-                    <span class="badge badge-outline" style="font-size: 0.65rem; padding: 2px 6px;">{{ g.nombre }}</span>
+                    <span class="badge badge-outline">{{ g.nombre }}</span>
                   }
                 </div>
               }
@@ -91,9 +91,9 @@
                 </div>
               }
               @if (movie.generos && movie.generos.length > 0) {
-                <div class="movie-genres" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">
+                <div class="movie-genres">
                   @for (g of movie.generos; track g.nombre) {
-                    <span class="badge badge-outline" style="font-size: 0.65rem; padding: 2px 6px;">{{ g.nombre }}</span>
+                    <span class="badge badge-outline">{{ g.nombre }}</span>
                   }
                 </div>
               }
@@ -105,12 +105,12 @@
       </div>
     </section>
 
-    <section class="all-movies">
-      <div class="section-header flex-between">
-        <h2 class="section-title">
+    <section class="all-movies mt-2">
+      <div class="section-header flex-between mb-2">
+        <h2 class="section-title mb-0">
           <span class="neon-line"></span> En Cartelera
         </h2>
-        <div class="search-box" style="display: flex; gap: 15px; max-width: 500px; width: 100%;">
+        <div class="search-box-wrapper">
           <input 
             type="text" 
             class="form-control" 
@@ -126,7 +126,7 @@
         </div>
       </div>
       
-      <div class="movies-grid">
+      <div class="movies-grid" style="margin-top: 20px;">
          @for (movie of filteredMovies; track movie.id) {
           <div class="movie-card neon-card clickable-card" [routerLink]="['/checkout', movie.id]">
             <div class="movie-poster">
@@ -143,9 +143,9 @@
                 <span class="meta-item text-accent">{{ movie.restriccion_edad }}</span>
               </div>
               @if (movie.generos && movie.generos.length > 0) {
-                <div class="movie-genres" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">
+                <div class="movie-genres">
                   @for (g of movie.generos; track g.nombre) {
-                    <span class="badge badge-outline" style="font-size: 0.65rem; padding: 2px 6px;">{{ g.nombre }}</span>
+                    <span class="badge badge-outline">{{ g.nombre }}</span>
                   }
                 </div>
               }

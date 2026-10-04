@@ -7,6 +7,7 @@ import { CandyBarComponent } from '../candy-bar/candy-bar.component';
 import { PaymentComponent } from '../payment/payment.component';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { BookingService } from '../../../core/services/booking.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { SpanishDatePipe } from '../../../shared/pipes/spanish-date.pipe';
 
 @Component({
@@ -19,6 +20,7 @@ import { SpanishDatePipe } from '../../../shared/pipes/spanish-date.pipe';
 export class BookingFlowComponent implements OnInit {
   private supabase = inject(SupabaseService);
   private route = inject(ActivatedRoute);
+  private toast = inject(ToastService);
   bookingService = inject(BookingService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -135,7 +137,7 @@ export class BookingFlowComponent implements OnInit {
         this.entradasPuntos++;
         this.bookingService.puntosUsadosEnEntradas.set(this.entradasPuntos * this.costoPuntoEntrada);
       } else {
-        alert('No tenés suficientes puntos disponibles (considerando lo que ya gastaste en entradas o candy).');
+        this.toast.show('No tenés suficientes puntos disponibles.', 'error');
       }
     }
   }
@@ -152,11 +154,11 @@ export class BookingFlowComponent implements OnInit {
 
   confirmarEntradas() {
     if (this.purchaseType === 'normal' && (this.entradasDinero + this.entradasPuntos) === 0) {
-      alert('Debes seleccionar al menos una entrada.');
+      this.toast.show('Debes seleccionar al menos una entrada.', 'warning');
       return;
     }
     if (this.purchaseType === 'combo' && !this.selectedComboId) {
-      alert('Debes seleccionar un combo.');
+      this.toast.show('Debes seleccionar un combo.', 'warning');
       return;
     }
     
