@@ -166,6 +166,8 @@
   }
   
   &.accessible {
+    flex: 2;
+    max-width: 60px;
     &.available {
       border-color: #4a00e0;
       background-color: rgba(74, 0, 224, 0.1);
@@ -221,6 +223,10 @@
     flex: 0 0 auto;
     width: 24px;
     max-width: none;
+    
+    &.accessible {
+      width: 52px;
+    }
   }
 }
 

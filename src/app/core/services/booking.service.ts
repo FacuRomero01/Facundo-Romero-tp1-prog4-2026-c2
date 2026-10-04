@@ -44,9 +44,10 @@ export class BookingService {
       // Regla VIP
       const isVip = ['R', 'S', 'T'].includes(letraFila);
       const multiplicadorPrecio = isVip ? 1.5 : 1.0;
+      const isAccessible = (letraFila === 'J');
+      const columnas = isAccessible ? 14 : 28;
       
-      for (let numeroColumna = 1; numeroColumna <= 28; numeroColumna++) {
-        let isAccessible = (letraFila === 'J');
+      for (let numeroColumna = 1; numeroColumna <= columnas; numeroColumna++) {
         
         newSeats.push({
           id: `${letraFila}-${numeroColumna}`,

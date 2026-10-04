@@ -16,7 +16,7 @@
               @if (seat.row === row) {
                 <div 
                   class="seat" 
-                  [class.aisle-right]="seat.col === 4 || seat.col === 24"
+                  [class.aisle-right]="(seat.type === 'accessible' && (seat.col === 2 || seat.col === 12)) || (seat.type !== 'accessible' && (seat.col === 4 || seat.col === 24))"
                   [ngClass]="[seat.status, seat.type]"
                   (click)="toggleSeat(seat)"
                   [title]="'Fila ' + seat.row + ' Columna ' + seat.col + ' - ' + (seat.type === 'vip' ? 'VIP' : (seat.type === 'accessible' ? 'Accesible' : 'Estándar'))">
