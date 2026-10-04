@@ -1,20 +1,39 @@
 <div class="candy-bar-container">
   <div class="candy-grid">
     @for (item of bookingService.candyItems(); track item.id) {
-      <div class="candy-card neon-card" [class.selected]="item.quantity > 0">
+      <div class="candy-card neon-card" [class.selected]="item.quantity > 0 || item.quantityPoints > 0">
         <div class="candy-icon-wrapper">
           <img [src]="item.imageUrl" [alt]="item.name" class="candy-icon">
         </div>
         <div class="candy-info">
           <h4>{{ item.name }}</h4>
           <p class="text-muted">{{ item.description }}</p>
-          <span class="price text-warm">{{ item.price | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
         </div>
-        <div class="candy-actions flex-between">
-          <button class="btn-ctrl" (click)="decrementQuantity(item)" [disabled]="item.quantity === 0" [class.disabled]="item.quantity === 0">-</button>
-          <span class="quantity" [class.active]="item.quantity > 0">{{ item.quantity }}</span>
-          <button class="btn-ctrl add" (click)="incrementQuantity(item)">+</button>
+        
+        <div class="candy-actions-container" style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+          <!-- Comprar con Dinero -->
+          <div class="candy-action-row" style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="price text-warm" style="font-size: 0.9rem;">{{ item.price | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+            <div class="candy-actions flex-between" style="min-width: 100px;">
+              <button class="btn-ctrl" (click)="decrementQuantity(item)" [disabled]="item.quantity === 0" [class.disabled]="item.quantity === 0">-</button>
+              <span class="quantity" [class.active]="item.quantity > 0">{{ item.quantity }}</span>
+              <button class="btn-ctrl add" (click)="incrementQuantity(item)">+</button>
+            </div>
+          </div>
+
+          <!-- Canjear con Puntos -->
+          @if (item.canjeActivo) {
+            <div class="candy-action-row" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+              <span class="price text-primary" style="font-size: 0.9rem;"><i class="icon-star"></i> {{ item.pointsCost }} pts</span>
+              <div class="candy-actions flex-between" style="min-width: 100px;">
+                <button class="btn-ctrl" (click)="decrementQuantityPoints(item)" [disabled]="item.quantityPoints === 0" [class.disabled]="item.quantityPoints === 0">-</button>
+                <span class="quantity" [class.active]="item.quantityPoints > 0" style="color: var(--color-primary)">{{ item.quantityPoints }}</span>
+                <button class="btn-ctrl add" (click)="incrementQuantityPoints(item)" style="border-color: var(--color-primary); color: var(--color-primary)">+</button>
+              </div>
+            </div>
+          }
         </div>
+        
       </div>
     }
   </div>

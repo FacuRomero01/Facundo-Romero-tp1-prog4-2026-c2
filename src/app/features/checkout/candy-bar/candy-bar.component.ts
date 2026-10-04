@@ -29,4 +29,20 @@ export class CandyBarComponent implements OnInit {
       items.map(productoCandy => productoCandy.id === item.id && productoCandy.quantity > 0 ? { ...productoCandy, quantity: productoCandy.quantity - 1 } : productoCandy)
     );
   }
+
+  incrementQuantityPoints(item: CandyItem) {
+    if (item.pointsCost <= this.bookingService.puntosDisponibles()) {
+      this.bookingService.candyItems.update(items => 
+        items.map(p => p.id === item.id ? { ...p, quantityPoints: p.quantityPoints + 1 } : p)
+      );
+    } else {
+      alert('No tenés suficientes puntos disponibles para agregar este producto.');
+    }
+  }
+
+  decrementQuantityPoints(item: CandyItem) {
+    this.bookingService.candyItems.update(items => 
+      items.map(p => p.id === item.id && p.quantityPoints > 0 ? { ...p, quantityPoints: p.quantityPoints - 1 } : p)
+    );
+  }
 }

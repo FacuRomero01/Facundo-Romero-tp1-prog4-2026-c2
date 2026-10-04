@@ -1,6 +1,7 @@
-import { Injectable, inject, signal, NgZone } from '@angular/core';
+import { Injectable, inject, signal, NgZone, computed } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { ConfiguracionPuntos } from '../../shared/models';
 
 export interface Seat {
   id: string; // Ej: A-1
@@ -16,8 +17,22 @@ export interface CandyItem {
   name: string;
   description: string;
   price: number;
+  pointsCost: number;
+  canjeActivo: boolean;
   imageUrl: string;
-  quantity: number;
+  quantity: number; // Pagados con dinero
+  quantityPoints: number; // Pagados con puntos
+}
+
+export interface CheckoutPayload {
+  funcionId: string;
+  seatsToReserve: Seat[];
+  finalPrice: number;
+  puntosGastados: number;
+  userId?: string;
+  comboId?: string;
+  entradasDinero: number;
+  entradasPuntos: number;
 }
 
 @Injectable({
@@ -32,12 +47,36 @@ export class BookingService {
   seats = signal<Seat[]>([]);
   candyItems = signal<CandyItem[]>([]);
   selectedFuncion = signal<any>(null); // Añadido para el pago
+  activePointsConfig = signal<ConfiguracionPuntos | null>(null);
+  userProfile = signal<any>(null);
+  maxSeats: number = 0;
 
+  puntosUsadosEnEntradas = signal<number>(0);
+  
+  // Ojo: Esto asume que CandyItem ya tiene quantityPoints y pointsCost definidos en la interfaz
+  candyPointsSpent = computed(() => 
+    this.candyItems().reduce((acc, item) => acc + (item.quantityPoints * (item.pointsCost || 0)), 0)
+  );
+
+  puntosDisponibles = computed(() => {
+    const totalPuntos = this.userProfile()?.puntos || 0;
+    return totalPuntos - this.puntosUsadosEnEntradas() - this.candyPointsSpent();
+  });
 
   // Configuración de la sala según requerimientos (20 filas x 28 columnas reales)
   readonly rows = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T'];
 
-  
+  async loadPointsConfig() {
+    const { data } = await this.supabase.client
+      .from('configuracion_puntos')
+      .select('*')
+      .eq('activa', true)
+      .single();
+    if (data) {
+      this.activePointsConfig.set(data);
+    }
+  }
+
   generateSeatMap() {
     const newSeats: Seat[] = [];
     for (let letraFila of this.rows) {
@@ -73,12 +112,21 @@ export class BookingService {
     }
   }
 
-  async createTicket(funcionId: string, seatsToReserve: Seat[], finalPrice: number, userId?: string) {
+  async createTicket(payload: CheckoutPayload) {
+    const { funcionId, seatsToReserve, finalPrice, puntosGastados, userId, comboId, entradasDinero, entradasPuntos } = payload;
+    
     // Generar un código corto y amigable (ej. ABCD-1234)
     const randomChars = Math.random().toString(36).substring(2, 6).toUpperCase();
     const randomNums = Math.floor(1000 + Math.random() * 9000);
     const qrData = `${randomChars}-${randomNums}`;
     
+    const config = this.activePointsConfig();
+    let puntosGanados = 0;
+    
+    if (config && finalPrice > 0) {
+      puntosGanados = Math.floor(finalPrice / config.monto_dinero) * config.puntos_otorgados;
+    }
+
     // Inserto el ticket
     const { data: ticket, error: ticketError } = await this.supabase.client
       .from('tickets')
@@ -87,7 +135,12 @@ export class BookingService {
         usuario_id: userId || null,
         codigo_qr: qrData,
         precio_final: finalPrice,
-        estado: 'valido'
+        estado: 'valido',
+        puntos_ganados: puntosGanados,
+        puntos_gastados: puntosGastados,
+        entradas_pagadas_dinero: entradasDinero,
+        entradas_pagadas_puntos: entradasPuntos,
+        combo_id: comboId || null
       })
       .select('id, codigo_qr')
       .single();
@@ -109,20 +162,71 @@ export class BookingService {
       if (seatsError) throw seatsError;
     }
 
-    // Inserto el candy asociado al ticket
-    const candy = this.candyItems().filter(itemCandy => itemCandy.quantity > 0);
-    if (candy.length > 0) {
-      const candyInserts = candy.map(itemCandy => ({
-        ticket_id: ticket.id,
-        producto_id: itemCandy.id,
-        cantidad: itemCandy.quantity
-      }));
-      try {
-        const { error: candyError } = await this.supabase.client
-          .from('ticket_candy')
-          .insert(candyInserts);
-      } catch (err) {
-        console.warn('Error al intentar guardar el Candy Bar:', err);
+    // Inserto el candy asociado al ticket (solo si no es combo, los combos ya los asume la BD)
+    if (!comboId) {
+      const candyInserts: any[] = [];
+      this.candyItems().forEach(itemCandy => {
+        if (itemCandy.quantity > 0) {
+          candyInserts.push({
+            ticket_id: ticket.id,
+            producto_id: itemCandy.id,
+            cantidad: itemCandy.quantity,
+            metodo_pago: 'dinero'
+          });
+        }
+        if (itemCandy.quantityPoints > 0) {
+          candyInserts.push({
+            ticket_id: ticket.id,
+            producto_id: itemCandy.id,
+            cantidad: itemCandy.quantityPoints,
+            metodo_pago: 'puntos'
+          });
+        }
+      });
+      
+      if (candyInserts.length > 0) {
+        try {
+          const { error: candyError } = await this.supabase.client
+            .from('ticket_candy')
+            .insert(candyInserts);
+          if (candyError) console.warn('Error candy:', candyError);
+        } catch (err) {
+          console.warn('Error al intentar guardar el Candy Bar:', err);
+        }
+      }
+    }
+
+    // Lógica de Puntos (Historial y Perfil)
+    if (userId && (puntosGanados > 0 || puntosGastados > 0)) {
+      // 1. Insertar historial
+      const { error: historialError } = await this.supabase.client
+        .from('historial_puntos')
+        .insert({
+          usuario_id: userId,
+          ticket_id: ticket.id,
+          puntos_ganados: puntosGanados,
+          puntos_gastados: puntosGastados,
+          motivo: comboId ? 'Compra de Combo' : 'Compra de Entradas/Candy',
+          snapshot_monto_dinero: config?.monto_dinero || null,
+          snapshot_puntos_otorgados: config?.puntos_otorgados || null
+        });
+
+      if (!historialError) {
+        // 2. Actualizar saldo del usuario
+        // Obtenemos el saldo actual primero
+        const { data: perfilData } = await this.supabase.client
+          .from('perfiles')
+          .select('puntos')
+          .eq('id', userId)
+          .single();
+          
+        if (perfilData) {
+          const nuevoSaldo = (perfilData.puntos || 0) + puntosGanados - puntosGastados;
+          await this.supabase.client
+            .from('perfiles')
+            .update({ puntos: nuevoSaldo })
+            .eq('id', userId);
+        }
       }
     }
 
@@ -173,8 +277,11 @@ export class BookingService {
         name: datosCandy.nombre || 'Producto',
         description: datosCandy.categoria || (datosCandy.es_combo ? 'Combo' : 'Snack'),
         price: datosCandy.precio || 0,
+        pointsCost: datosCandy.costo_puntos || 0,
+        canjeActivo: datosCandy.activo_canje || false,
         imageUrl: datosCandy.imagen_url || datosCandy.icono || '🍿',
-        quantity: 0
+        quantity: 0,
+        quantityPoints: 0
       }));
       this.candyItems.set(items);
     }

@@ -7,26 +7,27 @@
     
     <div class="stepper">
       <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
-        <div class="step-circle">1</div>
-        <span class="step-label">Función</span>
+        <div class="step-circle">1</div><span class="step-label">Función</span>
       </div>
       <div class="stepper-line" [class.active]="currentStep >= 2"></div>
       
       <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
-        <div class="step-circle">2</div>
-        <span class="step-label">Asientos</span>
+        <div class="step-circle">2</div><span class="step-label">Entradas</span>
       </div>
       <div class="stepper-line" [class.active]="currentStep >= 3"></div>
       
       <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
-        <div class="step-circle">3</div>
-        <span class="step-label">Candy Bar</span>
+        <div class="step-circle">3</div><span class="step-label">Asientos</span>
       </div>
-      <div class="stepper-line" [class.active]="currentStep >= 4"></div>
+      <div class="stepper-line" [class.active]="currentStep >= 4" *ngIf="purchaseType !== 'combo'"></div>
       
-      <div class="step" [class.active]="currentStep >= 4">
-        <div class="step-circle">4</div>
-        <span class="step-label">Pago</span>
+      <div class="step" [class.active]="currentStep >= 4" [class.completed]="currentStep > 4" *ngIf="purchaseType !== 'combo'">
+        <div class="step-circle">4</div><span class="step-label">Candy Bar</span>
+      </div>
+      <div class="stepper-line" [class.active]="currentStep >= 5" *ngIf="purchaseType !== 'combo'"></div>
+      
+      <div class="step" [class.active]="(purchaseType === 'combo' && currentStep >= 4) || currentStep >= 5">
+        <div class="step-circle">5</div><span class="step-label">Pago</span>
       </div>
     </div>
   </div>
@@ -34,8 +35,6 @@
   <div class="step-content neon-card">
     @if (currentStep === 1) {
       <div class="date-time-selection">
-        
-        <!-- 1. Funciones Disponibles -->
         <h3 class="text-center" style="margin-bottom: 30px; color: var(--color-primary);">Seleccioná el horario</h3>
         <div class="funciones-grid" style="margin-bottom: 50px;">
           @for (funcion of funciones; track funcion.id) {
@@ -48,9 +47,7 @@
                 <span class="badge badge-primary">{{ funcion.formato }}</span>
                 <span class="badge badge-outline">{{ funcion.idioma }}</span>
               </div>
-              <div class="funcion-room">
-                <i class="icon-screen"></i> {{ funcion.salas?.nombre }}
-              </div>
+              <div class="funcion-room"><i class="icon-screen"></i> {{ funcion.salas?.nombre }}</div>
             </div>
           } @empty {
             <div class="empty-state text-center" style="grid-column: 1 / -1; padding: 40px;">
@@ -61,7 +58,7 @@
 
         <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 40px 0;"></div>
 
-        <!-- 2. Info de la Película -->
+        <!-- Info de la Película -->
         @if (pelicula) {
           <h3 style="margin-bottom: 20px; color: var(--color-accent);">Sobre la película</h3>
           <div class="movie-info-card neon-card" style="display: flex; gap: 20px; margin-bottom: 30px; align-items: flex-start; background: rgba(0,0,0,0.2);">
@@ -84,11 +81,10 @@
             </div>
           </div>
           
-          <!-- 3. Reseñas (Paginadas) -->
+          <!-- Reseñas -->
           @if (resenas.length > 0) {
             <h3 style="margin-bottom: 20px; color: var(--color-primary);">Reseñas de la comunidad</h3>
             <div class="reviews-section neon-card" style="margin-bottom: 30px; background: rgba(0,0,0,0.1); padding: 25px;">
-              
               <div class="reviews-list">
                 @for (resena of paginatedResenas; track resena.id) {
                   <div style="margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
@@ -100,7 +96,6 @@
                   </div>
                 }
               </div>
-              
               @if (totalResenas > resenasPageSize) {
                 <div class="pagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 10px;">
                   <button class="btn btn-outline btn-sm" (click)="prevResenasPage()" [disabled]="resenasCurrentPage === 1">Anterior</button>
@@ -115,44 +110,132 @@
     }
 
     @if (currentStep === 2) {
-      <div class="text-center" style="margin-bottom: 30px;">
-        <h3>Elige tus butacas</h3>
-        <p class="text-muted">La sala se actualiza en tiempo real.</p>
-      </div>
-      
-      <app-seat-map></app-seat-map>
-      
-      <div class="step-actions flex-between" style="margin-top: 40px; border-top: var(--border-subtle); padding-top: 20px;">
-        <button class="btn btn-secondary" (click)="prevStep()">Volver</button>
-        <button class="btn btn-primary" (click)="nextStep()">Continuar al Candy Bar</button>
+      <div class="ticket-selection-container">
+        <h3 class="text-center" style="margin-bottom: 20px;">¿Cómo querés comprar?</h3>
+        
+        <div class="purchase-types" style="display: flex; gap: 20px; justify-content: center; margin-bottom: 30px;">
+          <div class="type-card neon-card" [class.selected]="purchaseType === 'normal'" (click)="setPurchaseType('normal')" style="cursor:pointer; width:45%; text-align:center;">
+            <h4><i class="icon-ticket"></i> Armar mi Compra</h4>
+            <p class="text-muted" style="font-size:0.9rem;">Elegí tus entradas (podés usar puntos) y pasá por el Candy Bar.</p>
+          </div>
+          
+          <div class="type-card neon-card" [class.selected]="purchaseType === 'combo'" (click)="setPurchaseType('combo')" style="cursor:pointer; width:45%; text-align:center;">
+            <h4><i class="icon-star"></i> Combo Cerrado</h4>
+            <p class="text-muted" style="font-size:0.9rem;">Entradas y Candy Bar con precio especial. (Solo con dinero)</p>
+          </div>
+        </div>
+
+        @if (purchaseType === 'normal') {
+          <div class="normal-selection animate-fade-in" style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px;">
+            <h4 style="margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Seleccioná la cantidad de entradas</h4>
+            
+            <div class="ticket-row flex-between" style="margin-bottom: 15px;">
+              <div>
+                <strong>Entrada General</strong>
+                <div class="text-warm">{{ bookingService.selectedFuncion()?.precio_base | currency:'ARS':'symbol-narrow':'1.0-0' }}</div>
+              </div>
+              <div class="candy-actions flex-between" style="min-width: 120px; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 5px;">
+                <button class="btn-ctrl" (click)="decrementEntradas('dinero')" [disabled]="entradasDinero === 0">-</button>
+                <span class="quantity">{{ entradasDinero }}</span>
+                <button class="btn-ctrl add" (click)="incrementEntradas('dinero')">+</button>
+              </div>
+            </div>
+
+            <div class="ticket-row flex-between" style="margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+              <div>
+                <strong>Canjear con Puntos</strong>
+                <div class="text-primary"><i class="icon-star"></i> {{ costoPuntoEntrada }} pts / u.</div>
+                <div class="text-muted" style="font-size: 0.8rem;">Tenés: {{ userPoints }} pts</div>
+              </div>
+              <div class="candy-actions flex-between" style="min-width: 120px; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 5px;">
+                <button class="btn-ctrl" (click)="decrementEntradas('puntos')" [disabled]="entradasPuntos === 0">-</button>
+                <span class="quantity text-primary">{{ entradasPuntos }}</span>
+                <button class="btn-ctrl add" (click)="incrementEntradas('puntos')" style="border-color: var(--color-primary); color: var(--color-primary)">+</button>
+              </div>
+            </div>
+            
+            <div class="text-right" style="margin-top:20px;">
+              <span class="badge badge-outline">Total Entradas: {{ entradasDinero + entradasPuntos }}</span>
+            </div>
+          </div>
+        }
+
+        @if (purchaseType === 'combo') {
+          <div class="combo-selection animate-fade-in">
+            <h4 style="margin-bottom: 20px;">Combos Disponibles</h4>
+            <div class="combos-grid" style="display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+              @for (combo of combosActivos; track combo.id) {
+                <div class="combo-card neon-card" [class.selected]="selectedComboId === combo.id" (click)="selectCombo(combo.id)" style="cursor:pointer; border: 2px solid transparent;">
+                  <h5>{{ combo.titulo }}</h5>
+                  <p class="text-muted" style="font-size:0.9rem;">{{ combo.descripcion }}</p>
+                  
+                  <ul style="list-style: none; padding: 0; margin: 10px 0; font-size: 0.85rem; color: rgba(255,255,255,0.8);">
+                    <li><i class="icon-ticket"></i> {{ combo.entradas_incluidas }} Entradas</li>
+                    @for (item of combo.combo_candy_productos; track item.candy_productos.nombre) {
+                      <li><i class="icon-popcorn"></i> {{ item.cantidad }}x {{ item.candy_productos.nombre }}</li>
+                    }
+                  </ul>
+                  
+                  <div class="price text-warm" style="font-weight: bold; font-size: 1.1rem; text-align: right;">{{ combo.precio | currency:'ARS':'symbol-narrow':'1.0-0' }}</div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+        
+        <div class="step-actions flex-between" style="margin-top: 40px; border-top: var(--border-subtle); padding-top: 20px;">
+          <button class="btn btn-secondary" (click)="prevStep()">Volver</button>
+          <button class="btn btn-primary" (click)="confirmarEntradas()" [disabled]="!purchaseType">Seleccionar Butacas</button>
+        </div>
       </div>
     }
 
     @if (currentStep === 3) {
       <div class="text-center" style="margin-bottom: 30px;">
+        <h3>Elige tus butacas</h3>
+        <p class="text-muted">Tenés que seleccionar <strong>{{ bookingService.maxSeats }}</strong> butaca(s).</p>
+      </div>
+      <app-seat-map></app-seat-map>
+      <div class="step-actions flex-between" style="margin-top: 40px; border-top: var(--border-subtle); padding-top: 20px;">
+        <button class="btn btn-secondary" (click)="prevStep()">Volver</button>
+        <button class="btn btn-primary" (click)="purchaseType === 'combo' ? (currentStep = 5) : nextStep()">
+          {{ purchaseType === 'combo' ? 'Ir al Pago' : 'Continuar al Candy Bar' }}
+        </button>
+      </div>
+    }
+
+    @if (currentStep === 4 && purchaseType !== 'combo') {
+      <div class="text-center" style="margin-bottom: 30px;">
         <h3>Candy Bar</h3>
         <p class="text-muted">Agregá snacks y bebidas a tu carrito.</p>
       </div>
-      
       <app-candy-bar></app-candy-bar>
-      
       <div class="step-actions flex-between" style="margin-top: 40px; border-top: var(--border-subtle); padding-top: 20px;">
         <button class="btn btn-secondary" (click)="prevStep()">Volver a butacas</button>
         <button class="btn btn-primary" (click)="nextStep()">Continuar al Pago</button>
       </div>
     }
 
-    @if (currentStep === 4) {
+    @if (currentStep === 5) {
       <div class="text-center" style="margin-bottom: 30px;">
         <h3>Pago y Emisión</h3>
         <p class="text-muted">Confirmá tu orden para generar el Ticket.</p>
       </div>
       
-      <app-payment #paymentRef></app-payment>
+      <!-- We pass the inputs to payment component -->
+      <app-payment 
+        #paymentRef 
+        [purchaseType]="purchaseType" 
+        [entradasDinero]="entradasDinero" 
+        [entradasPuntos]="entradasPuntos" 
+        [selectedComboId]="selectedComboId" 
+        [combosActivos]="combosActivos"
+        [costoPuntoEntrada]="costoPuntoEntrada"
+      ></app-payment>
       
       @if (!paymentRef.isPaid()) {
         <div class="step-actions flex-between" style="margin-top: 40px; border-top: var(--border-subtle); padding-top: 20px;">
-          <button class="btn btn-secondary" (click)="prevStep()">Volver al Candy Bar</button>
+          <button class="btn btn-secondary" (click)="purchaseType === 'combo' ? (currentStep = 3) : prevStep()">Volver</button>
         </div>
       }
     }
