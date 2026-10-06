@@ -69,14 +69,14 @@
       </h2>
       <div class="movies-grid">
         @for (movie of upcomingMovies; track movie.id) {
-          <div class="movie-card neon-card">
+          <div class="movie-card neon-card clickable-card" (click)="handleUpcomingClick(movie)">
             <div class="movie-poster">
               <img [src]="movie.imagen_url || 'assets/placeholder.jpg'" [alt]="movie.titulo">
               <div class="poster-overlay">
                 @if (isPresaleAvailable(movie)) {
-                  <span class="btn btn-primary btn-sm" [routerLink]="['/checkout', movie.id]">Comprar Preventa</span>
+                  <span class="btn btn-primary btn-sm">Comprar Preventa</span>
                 } @else {
-                  <span class="btn btn-secondary btn-sm" (click)="subscribeToAlert(movie)">Notificarme</span>
+                  <span class="btn btn-secondary btn-sm">Notificarme</span>
                 }
               </div>
             </div>

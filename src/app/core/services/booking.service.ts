@@ -162,9 +162,9 @@ export class BookingService {
       if (seatsError) throw seatsError;
     }
 
-    // Inserto el candy asociado al ticket (solo si no es combo, los combos ya los asume la BD)
+    // Inserto el candy asociado al ticket
+    const candyInserts: any[] = [];
     if (!comboId) {
-      const candyInserts: any[] = [];
       this.candyItems().forEach(itemCandy => {
         if (itemCandy.quantity > 0) {
           candyInserts.push({
@@ -183,16 +183,33 @@ export class BookingService {
           });
         }
       });
-      
-      if (candyInserts.length > 0) {
-        try {
-          const { error: candyError } = await this.supabase.client
-            .from('ticket_candy')
-            .insert(candyInserts);
-          if (candyError) console.warn('Error candy:', candyError);
-        } catch (err) {
-          console.warn('Error al intentar guardar el Candy Bar:', err);
-        }
+    } else {
+      // Si es combo, recuperamos los productos y los insertamos
+      const { data: comboItems } = await this.supabase.client
+        .from('combo_candy_productos')
+        .select('candy_producto_id, cantidad')
+        .eq('combo_id', comboId);
+        
+      if (comboItems && comboItems.length > 0) {
+        comboItems.forEach((ci: any) => {
+          candyInserts.push({
+            ticket_id: ticket.id,
+            producto_id: ci.candy_producto_id,
+            cantidad: ci.cantidad,
+            metodo_pago: 'dinero'
+          });
+        });
+      }
+    }
+    
+    if (candyInserts.length > 0) {
+      try {
+        const { error: candyError } = await this.supabase.client
+          .from('ticket_candy')
+          .insert(candyInserts);
+        if (candyError) console.warn('Error candy:', candyError);
+      } catch (err) {
+        console.warn('Error al intentar guardar el Candy Bar:', err);
       }
     }
 

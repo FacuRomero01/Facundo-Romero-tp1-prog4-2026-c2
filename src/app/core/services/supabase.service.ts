@@ -174,13 +174,15 @@ export class SupabaseService {
   }
 
   async markTicketUsed(ticketId: string): Promise<void> {
-    const { error } = await this.client.from('tickets').update({ estado: 'usado' }).eq('id', ticketId);
+    const { data, error } = await this.client.from('tickets').update({ estado: 'usado' }).eq('id', ticketId).select();
     if (error) throw error;
+    if (!data || data.length === 0) throw new Error('No se pudo actualizar el ticket. Posible problema de permisos (RLS).');
   }
 
   async markCandyDelivered(ticketId: string): Promise<void> {
-    const { error } = await this.client.from('ticket_candy').update({ estado: 'entregado' }).eq('ticket_id', ticketId);
+    const { data, error } = await this.client.from('ticket_candy').update({ estado: 'entregado' }).eq('ticket_id', ticketId).select();
     if (error) throw error;
+    if (!data || data.length === 0) throw new Error('No se pudo actualizar el candy. Posible problema de permisos (RLS).');
   }
 
   async getUpcomingMovies(): Promise<Movie[]> {

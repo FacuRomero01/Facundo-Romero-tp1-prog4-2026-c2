@@ -156,7 +156,18 @@
           </span>
         </div>
 
-        @if (candyCost() > 0 || totalPuntosGastados() > (entradasPuntos * costoPuntoEntrada)) {
+        @if (purchaseType === 'combo') {
+            <div class="detail-row candy-row" style="margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+              <span class="detail-label text-muted" style="display: block; margin-bottom: 10px;">Candy Bar Incluido</span>
+              <div class="detail-value">
+                @for (item of selectedCombo()?.combo_candy_productos; track item.candy_productos?.nombre) {
+                  <div class="candy-item-ticket" style="font-size: 0.9rem;">{{ item.cantidad }}x {{ item.candy_productos?.nombre || 'Producto' }}</div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (candyCost() > 0 || totalPuntosGastados() > (entradasPuntos * costoPuntoEntrada)) {
           <div class="detail-row candy-row" style="margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
             <span class="detail-label text-muted" style="display: block; margin-bottom: 10px;">Candy Bar</span>
             <div class="detail-value">

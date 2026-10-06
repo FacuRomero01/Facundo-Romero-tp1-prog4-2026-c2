@@ -2,7 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { SupabaseService } from '../../core/services/supabase.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Movie } from '../../shared/models';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 import { SwPush } from '@angular/service-worker';
@@ -20,6 +20,7 @@ export class HomeComponent implements OnInit {
   private toastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
   private swPush = inject(SwPush, { optional: true });
+  private router = inject(Router);
 
   topMovies: Movie[] = [];
   allMovies: Movie[] = [];
@@ -104,6 +105,14 @@ export class HomeComponent implements OnInit {
     const release = new Date(dateStr);
     const diff = release.getTime() - today.getTime();
     return Math.ceil(diff / (1000 * 3600 * 24));
+  }
+
+  handleUpcomingClick(movie: Movie) {
+    if (this.isPresaleAvailable(movie)) {
+      this.router.navigate(['/checkout', movie.id]);
+    } else {
+      this.subscribeToAlert(movie);
+    }
   }
 
   onSearch(event: Event) {
