@@ -287,7 +287,7 @@ export class BookingService {
   }
 
   async loadCandyItems() {
-    const { data } = await this.supabase.client.from('candy_productos').select('*');
+    const { data } = await this.supabase.client.from('candy_productos').select('*').eq('activo', true);
     if (data && data.length > 0) {
       const items = data.map(datosCandy => ({
         id: datosCandy.id,
