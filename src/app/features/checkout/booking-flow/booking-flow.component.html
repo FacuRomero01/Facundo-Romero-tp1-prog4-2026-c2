@@ -19,16 +19,14 @@
       <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
         <div class="step-circle">3</div><span class="step-label">Asientos</span>
       </div>
-      <div class="stepper-line" [class.active]="currentStep >= 4" *ngIf="purchaseType !== 'combo'"></div>
-      
-      <div class="step" [class.active]="currentStep >= 4" [class.completed]="currentStep > 4" *ngIf="purchaseType !== 'combo'">
-        <div class="step-circle">4</div><span class="step-label">Candy Bar</span>
-      </div>
-      <div class="stepper-line" [class.active]="currentStep >= 5" *ngIf="purchaseType !== 'combo'"></div>
-      
-      <div class="step" [class.active]="(purchaseType === 'combo' && currentStep >= 4) || currentStep >= 5">
-        <div class="step-circle">5</div><span class="step-label">Pago</span>
-      </div>
+      <div class="stepper-line" [class.active]="currentStep >= 4 || (purchaseType === 'combo' && currentStep >= 5)"></div>
+        <div class="step" [class.active]="currentStep >= 4 || (purchaseType === 'combo' && currentStep >= 5)" [class.completed]="currentStep > 4 || (purchaseType === 'combo' && currentStep >= 5)">
+          <div class="step-circle">4</div><span class="step-label">Candy Bar</span>
+        </div>
+        <div class="stepper-line" [class.active]="currentStep >= 5"></div>
+        <div class="step" [class.active]="currentStep >= 5" [class.completed]="currentStep > 5">
+          <div class="step-circle">5</div><span class="step-label">Pago</span>
+        </div>
     </div>
   </div>
 

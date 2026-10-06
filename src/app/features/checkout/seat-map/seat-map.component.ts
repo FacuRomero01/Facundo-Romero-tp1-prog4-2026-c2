@@ -16,6 +16,11 @@ export class SeatMapComponent implements OnInit, OnDestroy {
   
   ngOnInit() {
     this.bookingService.generateSeatMap();
+    const funcionId = this.bookingService.selectedFuncion()?.id;
+    if (funcionId) {
+      this.bookingService.loadOccupiedSeats(funcionId);
+      this.bookingService.subscribeToSeatChanges(funcionId);
+    }
   }
 
   ngOnDestroy() {

@@ -170,9 +170,7 @@ export class BookingFlowComponent implements OnInit {
     // (Opcional) setear un limitador de butacas en el servicio o dejar que el mapa confíe
     this.bookingService.maxSeats = totalButacas || 0;
 
-    this.bookingService.loadOccupiedSeats(this.selectedFuncionId!);
-    this.bookingService.subscribeToSeatChanges(this.selectedFuncionId!);
-    
+    // Delegado al SeatMapComponent en ngOnInit
     this.nextStep();
   }
 
