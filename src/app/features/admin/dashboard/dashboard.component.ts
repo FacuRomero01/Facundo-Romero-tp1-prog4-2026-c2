@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { Movie } from '../../../shared/models';
 import { SpanishDatePipe } from '../../../shared/pipes/spanish-date.pipe';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -19,6 +21,20 @@ export class AdminDashboardComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   
   currentTab = 'peliculas'; // peliculas, funciones, reportes
+
+  allMoviesLight: any[] = [];
+  moviesPage = 1;
+  moviesPageSize = 5;
+  moviesTotal = 0;
+  moviesSearch = '';
+  moviesSearchSubject = new Subject<string>();
+
+  funcionesPage = 1;
+  funcionesPageSize = 10;
+  funcionesTotal = 0;
+  fFuncionPeliculaId = '';
+  fFuncionFecha = '';
+  funcionesSearchSubject = new Subject<void>();
   
   // Películas
   movies: Movie[] = [];
@@ -88,6 +104,21 @@ export class AdminDashboardComponent implements OnInit {
   combosVendidos = 0;
 
   async ngOnInit() {
+    this.moviesSearchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.moviesPage = 1;
+      this.loadMoviesPaginated();
+    });
+
+    this.funcionesSearchSubject.pipe(
+      debounceTime(300)
+    ).subscribe(() => {
+      this.funcionesPage = 1;
+      this.loadFuncionesPaginated();
+    });
+
     const session = await this.supabase.auth.getSession();
     if (!session?.data?.session) {
       this.router.navigate(['/auth/login']);
@@ -103,14 +134,17 @@ export class AdminDashboardComponent implements OnInit {
 
   async loadData() {
     try {
-      this.movies = await this.supabase.getAllMovies();
+      const { data: moviesLight } = await this.supabase.client.from('peliculas').select('id, titulo').order('titulo');
+      this.allMoviesLight = moviesLight || [];
       
+      await this.loadMoviesPaginated();
+      await this.loadFuncionesPaginated();
+
       const [
         tickets, 
         butacas, 
         combosData, 
         generos, 
-        funcionesData, 
         logsData,
         cuponesData,
         candyData,
@@ -121,7 +155,6 @@ export class AdminDashboardComponent implements OnInit {
         this.supabase.client.from('butacas_ocupadas').select('*', { count: 'exact', head: true }),
         this.supabase.client.from('combos').select('*, combo_candy_productos(cantidad, candy_producto_id, candy_productos(nombre))'),
         this.supabase.client.from('generos').select('*'),
-        this.supabase.client.from('funciones').select('*, peliculas(titulo), salas(nombre)').order('fecha_hora', { ascending: false }),
         this.supabase.client.from('log_actividad').select('*, perfiles(nombre, apellido, email)').order('fecha', { ascending: false }).limit(50),
         this.supabase.client.from('cupones').select('*').order('id', { ascending: false }),
         this.supabase.client.from('candy_productos').select('*').order('nombre'),
@@ -138,7 +171,6 @@ export class AdminDashboardComponent implements OnInit {
       this.entradasVendidas = butacas.count || 0;
       this.combosVendidos = ticketCandyData.data?.reduce((acc, c) => acc + (c.cantidad || 0), 0) || 0;
       this.generosDisponibles = generos.data || [];
-      this.funciones = funcionesData.data || [];
       this.logs = logsData.data || [];
 
       // Calculate charts
@@ -169,6 +201,42 @@ export class AdminDashboardComponent implements OnInit {
       this.cdr.detectChanges();
     }
   }
+
+  async loadMoviesPaginated() {
+    let query = this.supabase.client.from('peliculas').select('*', { count: 'exact' });
+    if (this.moviesSearch) {
+      query = query.ilike('titulo', `%${this.moviesSearch}%`);
+    }
+    const from = (this.moviesPage - 1) * this.moviesPageSize;
+    const to = from + this.moviesPageSize - 1;
+    const { data, count, error } = await query.order('fecha_estreno', { ascending: false }).range(from, to);
+    if (!error) {
+      this.movies = data || [];
+      this.moviesTotal = count || 0;
+      this.cdr.detectChanges();
+    }
+  }
+
+  async loadFuncionesPaginated() {
+    let query = this.supabase.client.from('funciones').select('*, peliculas!inner(titulo), salas!inner(nombre)', { count: 'exact' });
+    if (this.fFuncionPeliculaId) {
+      query = query.eq('pelicula_id', this.fFuncionPeliculaId);
+    }
+    if (this.fFuncionFecha) {
+      query = query.gte('fecha_hora', `${this.fFuncionFecha}T00:00:00`).lte('fecha_hora', `${this.fFuncionFecha}T23:59:59`);
+    }
+    const from = (this.funcionesPage - 1) * this.funcionesPageSize;
+    const to = from + this.funcionesPageSize - 1;
+    const { data, count, error } = await query.order('fecha_hora', { ascending: false }).range(from, to);
+    if (!error) {
+      this.funciones = data || [];
+      this.funcionesTotal = count || 0;
+      this.cdr.detectChanges();
+    }
+  }
+
+  get moviesPagesCount(): number { return Math.ceil(this.moviesTotal / this.moviesPageSize) || 1; }
+  get funcionesPagesCount(): number { return Math.ceil(this.funcionesTotal / this.funcionesPageSize) || 1; }
 
   setTab(tab: string) {
     this.currentTab = tab;
@@ -219,19 +287,25 @@ export class AdminDashboardComponent implements OnInit {
 
   editarPelicula(movie: Movie) { this.abrirFormulario(movie); }
   
+  getMovieDynamicState(movie: any): string {
+    if (movie.estado === 'retirada') return 'retirada';
+    const today = this.supabase.getArgentinaDateString();
+    return movie.fecha_estreno <= today ? 'cartelera' : 'proximamente';
+  }
+
   async cambiarEstado(movie: Movie) {
-    const estados: ('cartelera' | 'proximamente')[] = ['proximamente', 'cartelera'];
-    const nextEstado = estados[(estados.indexOf(movie.estado as any) + 1) % estados.length] || 'cartelera';
-    if (confirm(`¿Cambiar estado a "${nextEstado}"?`)) {
+    const isRetirada = movie.estado === 'retirada';
+    const nextEstado = isRetirada ? 'cartelera' : 'retirada';
+    if (confirm(`¿Cambiar estado a "${nextEstado}"? (Las películas activas se dividen automáticamente en Cartelera o Próximamente según su fecha de estreno)`)) {
       await this.supabase.client.from('peliculas').update({ estado: nextEstado }).eq('id', movie.id);
-      await this.loadData();
+      await this.loadMoviesPaginated();
     }
   }
 
   // Funciones ABM
   abrirFormularioFuncion() {
     this.newFuncion = this.getEmptyFuncion();
-    if (this.movies.length > 0) this.newFuncion.pelicula_id = this.movies[0].id;
+    if (this.allMoviesLight.length > 0) this.newFuncion.pelicula_id = this.allMoviesLight[0].id;
     this.showFuncionForm = true;
   }
 

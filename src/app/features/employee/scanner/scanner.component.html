@@ -15,11 +15,24 @@
           placeholder="Ej: ABCD-1234" 
           (keyup.enter)="buscarTicket()"
           [disabled]="loading"
-          style="text-transform: none;">
+          style="text-transform: none; flex: 1;">
+        <button class="btn btn-secondary" (click)="iniciarEscaner()" [disabled]="loading || isScanning" style="padding: 0 15px;" title="Escanear QR">
+          📷
+        </button>
         <button class="btn btn-primary" (click)="buscarTicket()" [disabled]="loading || !qrCode">
           Buscar
         </button>
       </div>
+
+      @if (isScanning) {
+        <div class="scanner-container" style="margin-top: 15px; border: 1px solid var(--border-subtle); padding: 10px; border-radius: var(--radius-md); background: rgba(0,0,0,0.5);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="color: var(--color-primary); font-weight: bold;">Posicione el código QR en el centro</span>
+            <button class="btn btn-secondary btn-sm" (click)="detenerEscaner()" style="padding: 5px 10px;">Cancelar</button>
+          </div>
+          <div id="reader" style="width: 100%; border-radius: var(--radius-sm); overflow: hidden; background: #000; min-height: 250px;"></div>
+        </div>
+      }
     </div>
 
     @if (errorMsg) {

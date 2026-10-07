@@ -128,6 +128,13 @@
         <button class="btn btn-primary btn-sm" (click)="abrirFormulario()">+ Nueva Película</button>
       </div>
 
+      <div class="filters" style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center;">
+        <input type="text" class="form-control" placeholder="Buscar por título..." [(ngModel)]="moviesSearch" (input)="moviesSearchSubject.next(moviesSearch)" style="max-width: 300px;">
+        @if (moviesSearch) {
+          <button class="btn btn-outline btn-sm" (click)="moviesSearch=''; moviesSearchSubject.next('')">Limpiar</button>
+        }
+      </div>
+
       <div class="table-container">
         <table class="neon-table">
           <thead>
@@ -148,8 +155,12 @@
                 <td>{{ movie.titulo }}</td>
                 <td>{{ movie.duracion_minutos }} min</td>
                 <td>
-                  <span class="badge" [class.badge-primary]="movie.estado === 'cartelera'" [class.badge-outline]="movie.estado !== 'cartelera'">
-                    {{ movie.estado | titlecase }}
+                  <span class="badge" 
+                        [class.badge-primary]="getMovieDynamicState(movie) === 'cartelera'" 
+                        [class.badge-outline]="getMovieDynamicState(movie) === 'proximamente'"
+                        [style.background]="getMovieDynamicState(movie) === 'retirada' ? 'var(--color-error)' : ''"
+                        [style.color]="getMovieDynamicState(movie) === 'retirada' ? 'white' : ''">
+                    {{ getMovieDynamicState(movie) | titlecase }}
                   </span>
                 </td>
                 <td>
@@ -163,6 +174,12 @@
           </tbody>
         </table>
       </div>
+
+      <div class="pagination flex-center mt-2" style="gap: 15px;">
+        <button class="btn btn-secondary btn-sm" (click)="moviesPage=moviesPage-1; loadMoviesPaginated()" [disabled]="moviesPage === 1">&lt; Anterior</button>
+        <span class="text-muted">Página {{ moviesPage }} de {{ moviesPagesCount }}</span>
+        <button class="btn btn-secondary btn-sm" (click)="moviesPage=moviesPage+1; loadMoviesPaginated()" [disabled]="moviesPage >= moviesPagesCount">Siguiente &gt;</button>
+      </div>
     </div>
   }
 
@@ -171,6 +188,21 @@
       <div class="flex-between mb-2">
         <h3>Agenda de Funciones (Salas)</h3>
         <button class="btn btn-primary btn-sm" (click)="abrirFormularioFuncion()">+ Crear Función</button>
+      </div>
+
+      <div class="filters" style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center;">
+        <select class="form-control" [(ngModel)]="fFuncionPeliculaId" (change)="funcionesSearchSubject.next()" style="max-width: 250px;">
+          <option value="">Todas las películas</option>
+          @for (m of allMoviesLight; track m.id) {
+            <option [value]="m.id">{{ m.titulo }}</option>
+          }
+        </select>
+        
+        <input type="date" class="form-control" [(ngModel)]="fFuncionFecha" (change)="funcionesSearchSubject.next()" style="max-width: 200px;">
+        
+        @if (fFuncionPeliculaId || fFuncionFecha) {
+          <button class="btn btn-outline btn-sm" (click)="fFuncionPeliculaId=''; fFuncionFecha=''; funcionesSearchSubject.next()">Limpiar</button>
+        }
       </div>
 
       <div class="table-container">
@@ -198,6 +230,12 @@
             }
           </tbody>
         </table>
+      </div>
+
+      <div class="pagination flex-center mt-2" style="gap: 15px;">
+        <button class="btn btn-secondary btn-sm" (click)="funcionesPage=funcionesPage-1; loadFuncionesPaginated()" [disabled]="funcionesPage === 1">&lt; Anterior</button>
+        <span class="text-muted">Página {{ funcionesPage }} de {{ funcionesPagesCount }}</span>
+        <button class="btn btn-secondary btn-sm" (click)="funcionesPage=funcionesPage+1; loadFuncionesPaginated()" [disabled]="funcionesPage >= funcionesPagesCount">Siguiente &gt;</button>
       </div>
     </div>
   }
@@ -539,7 +577,7 @@
         <div class="form-group">
           <label class="form-label">Película</label>
           <select class="form-control" [(ngModel)]="newFuncion.pelicula_id">
-            @for (m of movies; track m.id) {
+            @for (m of allMoviesLight; track m.id) {
               <option [value]="m.id">{{ m.titulo }}</option>
             }
           </select>
@@ -583,3 +621,8 @@
     </div>
   </div>
 }
+
+
+
+
+

@@ -55,11 +55,21 @@ export class SupabaseService {
     if (error) throw error;
   }
 
+  public getArgentinaDateString(): string {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    });
+    return formatter.format(new Date());
+  }
+
   async getMovies(): Promise<Movie[]> {
+    const today = this.getArgentinaDateString();
     const { data, error } = await this.client
       .from('peliculas')
       .select('*, generos(nombre)')
-      .eq('estado', 'cartelera');
+      .neq('estado', 'retirada')
+      .lte('fecha_estreno', today);
       
     if (error) throw error;
     return data || [];
@@ -132,10 +142,12 @@ export class SupabaseService {
   }
 
   async getFunciones(peliculaId: string): Promise<any[]> {
+    const nowIso = new Date().toISOString();
     const { data, error } = await this.client
       .from('funciones')
       .select('*, salas(nombre), peliculas(titulo, precio_preventa, fecha_estreno)')
       .eq('pelicula_id', peliculaId)
+      .gt('fecha_hora', nowIso)
       .order('fecha_hora', { ascending: true });
       
     if (error) throw error;
@@ -186,10 +198,12 @@ export class SupabaseService {
   }
 
   async getUpcomingMovies(): Promise<Movie[]> {
+    const today = this.getArgentinaDateString();
     const { data, error } = await this.client
       .from('peliculas')
       .select('*, generos(nombre)')
-      .eq('estado', 'proximamente');
+      .neq('estado', 'retirada')
+      .gt('fecha_estreno', today);
     if (error) throw error;
     return data || [];
   }

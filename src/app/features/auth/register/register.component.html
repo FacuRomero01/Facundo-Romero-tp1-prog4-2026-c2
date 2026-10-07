@@ -18,41 +18,72 @@
         <div class="form-row flex-between" style="gap: 15px;">
           <div class="form-group" style="flex: 1;">
             <label for="nombre" class="form-label">Nombre</label>
-            <input id="nombre" type="text" formControlName="nombre" class="form-control" placeholder="Juan">
+            <input id="nombre" type="text" formControlName="nombre" class="form-control" placeholder="Juan"
+                   [style.border-color]="registerForm.get('nombre')?.invalid && registerForm.get('nombre')?.touched ? '#ff4d4d' : null">
+            @if (registerForm.get('nombre')?.invalid && registerForm.get('nombre')?.touched) {
+              <small style="color: #ff4d4d; font-size: 0.8rem; margin-top: 4px; display: block;">El nombre es obligatorio</small>
+            }
           </div>
 
           <div class="form-group" style="flex: 1;">
             <label for="apellido" class="form-label">Apellido</label>
-            <input id="apellido" type="text" formControlName="apellido" class="form-control" placeholder="Pérez">
+            <input id="apellido" type="text" formControlName="apellido" class="form-control" placeholder="Pérez"
+                   [style.border-color]="registerForm.get('apellido')?.invalid && registerForm.get('apellido')?.touched ? '#ff4d4d' : null">
+            @if (registerForm.get('apellido')?.invalid && registerForm.get('apellido')?.touched) {
+              <small style="color: #ff4d4d; font-size: 0.8rem; margin-top: 4px; display: block;">El apellido es obligatorio</small>
+            }
           </div>
         </div>
 
         <div class="form-group">
           <label for="email" class="form-label">Correo Electrónico</label>
-          <input id="email" type="email" formControlName="email" class="form-control" placeholder="tu@email.com">
+          <input id="email" type="email" formControlName="email" class="form-control" placeholder="tu@email.com"
+                 [style.border-color]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched ? '#ff4d4d' : null">
+          @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+            <small style="color: #ff4d4d; font-size: 0.8rem; margin-top: 4px; display: block;">
+              {{ registerForm.get('email')?.hasError('required') ? 'El email es obligatorio' : 'El formato del email no es válido' }}
+            </small>
+          }
         </div>
 
         <div class="form-group">
           <label for="password" class="form-label">Contraseña</label>
-          <input id="password" type="password" formControlName="password" class="form-control" placeholder="••••••••">
+          <input id="password" type="password" formControlName="password" class="form-control" placeholder="••••••••"
+                 [style.border-color]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched ? '#ff4d4d' : null">
+          @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+            <small style="color: #ff4d4d; font-size: 0.8rem; margin-top: 4px; display: block;">
+              {{ registerForm.get('password')?.hasError('required') ? 'La contraseña es obligatoria' : 'Debe tener al menos 6 caracteres' }}
+            </small>
+          } @else {
+            <small class="text-muted" style="font-size: 0.8rem; margin-top: 4px; display: block;">Requisito: Debe tener al menos 6 caracteres.</small>
+          }
         </div>
 
         <div class="form-row flex-between" style="gap: 15px;">
           <div class="form-group" style="flex: 1;">
             <label for="fechaNacimiento" class="form-label">Nacimiento</label>
-            <input id="fechaNacimiento" type="date" formControlName="fechaNacimiento" class="form-control">
+            <input id="fechaNacimiento" type="date" formControlName="fechaNacimiento" class="form-control"
+                   [style.border-color]="registerForm.get('fechaNacimiento')?.invalid && registerForm.get('fechaNacimiento')?.touched ? '#ff4d4d' : null">
+            @if (registerForm.get('fechaNacimiento')?.invalid && registerForm.get('fechaNacimiento')?.touched) {
+              <small style="color: #ff4d4d; font-size: 0.8rem; margin-top: 4px; display: block;">Obligatorio</small>
+            }
           </div>
 
           <div class="form-group" style="flex: 1;">
             <label for="diasVacaciones" class="form-label">Días Vacaciones/Año</label>
-            <input id="diasVacaciones" type="number" formControlName="diasVacaciones" class="form-control" placeholder="14">
+            <input id="diasVacaciones" type="number" formControlName="diasVacaciones" class="form-control" placeholder="14"
+                   [style.border-color]="registerForm.get('diasVacaciones')?.invalid && registerForm.get('diasVacaciones')?.touched ? '#ff4d4d' : null">
+            @if (registerForm.get('diasVacaciones')?.invalid && registerForm.get('diasVacaciones')?.touched) {
+              <small style="color: #ff4d4d; font-size: 0.8rem; margin-top: 4px; display: block;">Obligatorio (mínimo 0)</small>
+            }
           </div>
         </div>
 
         <div class="form-row flex-between" style="gap: 15px;">
           <div class="form-group" style="flex: 1;">
             <label for="tipoSangre" class="form-label">Grupo Sanguíneo</label>
-            <select id="tipoSangre" formControlName="tipoSangre" class="form-control" style="appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=%22white%22 height=%2224%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/><path d=%22M0 0h24v24H0z%22 fill=%22none%22/></svg>'); background-repeat: no-repeat; background-position: right 10px center;">
+            <select id="tipoSangre" formControlName="tipoSangre" class="form-control" style="appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=%22white%22 height=%2224%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/><path d=%22M0 0h24v24H0z%22 fill=%22none%22/></svg>'); background-repeat: no-repeat; background-position: right 10px center;"
+                    [style.border-color]="registerForm.get('tipoSangre')?.invalid && registerForm.get('tipoSangre')?.touched ? '#ff4d4d' : null">
               <option value="">Seleccionar...</option>
               <option value="A+">A+</option>
               <option value="A-">A-</option>
@@ -67,7 +98,8 @@
 
           <div class="form-group" style="flex: 1;">
             <label for="colorOjos" class="form-label">Color Ojos</label>
-            <select id="colorOjos" formControlName="colorOjos" class="form-control" style="appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=%22white%22 height=%2224%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/><path d=%22M0 0h24v24H0z%22 fill=%22none%22/></svg>'); background-repeat: no-repeat; background-position: right 10px center;">
+            <select id="colorOjos" formControlName="colorOjos" class="form-control" style="appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=%22white%22 height=%2224%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/><path d=%22M0 0h24v24H0z%22 fill=%22none%22/></svg>'); background-repeat: no-repeat; background-position: right 10px center;"
+                    [style.border-color]="registerForm.get('colorOjos')?.invalid && registerForm.get('colorOjos')?.touched ? '#ff4d4d' : null">
               <option value="">Seleccionar...</option>
               <option value="Marrones">Marrones</option>
               <option value="Azules">Azules</option>

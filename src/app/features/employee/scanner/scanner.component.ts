@@ -1,8 +1,9 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { Html5Qrcode } from 'html5-qrcode';
 
 @Component({
   selector: 'app-scanner',
@@ -11,7 +12,7 @@ import { ToastService } from '../../../core/services/toast.service';
   templateUrl: './scanner.component.html',
   styleUrl: './scanner.component.scss'
 })
-export class ScannerComponent {
+export class ScannerComponent implements OnDestroy {
   private supabase = inject(SupabaseService);
   private toast = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
@@ -20,6 +21,9 @@ export class ScannerComponent {
   ticketData: any = null;
   loading: boolean = false;
   errorMsg: string = '';
+  
+  isScanning: boolean = false;
+  html5QrCode: Html5Qrcode | null = null;
 
   async buscarTicket() {
     if (!this.qrCode) return;
@@ -74,6 +78,51 @@ export class ScannerComponent {
     this.qrCode = '';
     this.ticketData = null;
     this.errorMsg = '';
+    this.cdr.detectChanges();
+  }
+
+  ngOnDestroy() {
+    this.detenerEscaner();
+  }
+
+  async iniciarEscaner() {
+    this.isScanning = true;
+    this.errorMsg = '';
+    this.cdr.detectChanges();
+    
+    try {
+      this.html5QrCode = new Html5Qrcode("reader");
+      await this.html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          // Éxito
+          this.detenerEscaner();
+          this.qrCode = decodedText;
+          this.buscarTicket();
+        },
+        (errorMessage) => {
+          // Errores de lectura continuos, normal hasta que enfoca bien
+        }
+      );
+    } catch (err) {
+      console.error("Error iniciando cámara", err);
+      this.errorMsg = "Error al iniciar la cámara. Verifique los permisos.";
+      this.isScanning = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  async detenerEscaner() {
+    if (this.html5QrCode && this.html5QrCode.isScanning) {
+      try {
+        await this.html5QrCode.stop();
+        this.html5QrCode.clear();
+      } catch (err) {
+        console.error("Error deteniendo escáner", err);
+      }
+    }
+    this.isScanning = false;
     this.cdr.detectChanges();
   }
 }

@@ -27,7 +27,7 @@
         
         <div class="movies-grid">
           @for (ticket of activeTickets; track ticket.id) {
-            <div class="movie-card neon-card" [style.opacity]="ticket.estado === 'cancelado' ? '0.5' : '1'">
+            <div class="movie-card neon-card" [style.opacity]="ticket.estado === 'cancelado' ? '0.5' : '1'" (click)="ticket.estado !== 'cancelado' ? abrirDetalleEntrada(ticket) : null" [style.cursor]="ticket.estado !== 'cancelado' ? 'pointer' : 'default'">
               <div class="movie-info">
                 <h4 class="mb-1">{{ ticket.funciones?.peliculas?.titulo }}</h4>
                 <p class="text-muted mb-1" style="font-size: 0.9rem;">{{ ticket.funciones?.fecha_hora | spanishDate:'short' }}</p>
@@ -39,7 +39,7 @@
                 </div>
                 
                 @if (ticket.estado === 'valido' && canCancel(ticket.funciones?.fecha_hora)) {
-                  <button class="btn btn-secondary btn-sm w-100 mt-2" (click)="cancelTicket(ticket)">
+                  <button class="btn btn-secondary btn-sm w-100 mt-2" (click)="$event.stopPropagation(); cancelTicket(ticket)">
                     Cancelar y Devolver Crédito
                   </button>
                 } @else if (ticket.estado === 'valido') {
@@ -101,5 +101,83 @@
         }
       </div>
     }
+  }
+
+  @if (showTicketModal) {
+    <div class="modal-overlay" (click)="cerrarModalEntrada()" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px;">
+      <div class="modal-content ticket-card neon-card text-center" (click)="$event.stopPropagation()" style="max-width: 450px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;">
+        <button (click)="cerrarModalEntrada()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; color: var(--color-text); cursor: pointer; z-index: 2;">&times;</button>
+        
+        @if (loadingModal) {
+          <div class="flex-center" style="min-height: 200px;"><p class="text-muted">Cargando detalles...</p></div>
+        } @else if (selectedTicketDetails) {
+          <div class="ticket-header" style="margin-top: 10px;">
+            <h3 class="glow-text" style="font-size: 1.5rem;">Detalle de Entrada</h3>
+            <span class="badge mt-1" 
+                  [class.badge-primary]="selectedTicketDetails.ticket.estado === 'valido'"
+                  [style.background]="selectedTicketDetails.ticket.estado === 'usado' ? 'var(--color-error)' : ''"
+                  style="display: inline-block;">
+              {{ selectedTicketDetails.ticket.estado | uppercase }}
+            </span>
+            <p class="text-muted mt-1" style="font-size: 0.9rem;">Código: {{ selectedTicketDetails.ticket.codigo_qr }}</p>
+          </div>
+          
+          <div class="qr-container" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; margin-top: 20px;">
+            <div class="qr-frame" style="background: white; padding: 10px; border-radius: 8px; display: inline-block;">
+              <img [src]="selectedQrUrl" alt="Código QR de la Entrada" style="display: block;">
+            </div>
+          </div>
+
+          <div class="ticket-details" style="text-align: left; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; margin-top: 20px;">
+            <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <span class="detail-label text-muted">Película</span>
+              <span class="detail-value text-accent" style="font-weight: 500;">{{ selectedTicketDetails.ticket.funciones?.peliculas?.titulo }}</span>
+            </div>
+            <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <span class="detail-label text-muted">Función</span>
+              <span class="detail-value">{{ selectedTicketDetails.ticket.funciones?.fecha_hora | spanishDate:'short' }}</span>
+            </div>
+            <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <span class="detail-label text-muted">Sala</span>
+              <span class="detail-value">{{ selectedTicketDetails.ticket.funciones?.salas?.nombre }}</span>
+            </div>
+            <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <span class="detail-label text-muted">Cantidad</span>
+              <span class="detail-value">{{ selectedTicketDetails.ticket.cantidad_entradas }} entradas</span>
+            </div>
+            
+            @if (selectedTicketDetails.butacas && selectedTicketDetails.butacas.length > 0) {
+              <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span class="detail-label text-muted">Butacas</span>
+                <span class="detail-value text-right" style="max-width: 60%;">
+                  @for (b of selectedTicketDetails.butacas; track b.id; let last = $last) {
+                    <span class="badge badge-outline" style="font-size: 0.75rem; padding: 2px 6px; margin: 2px;">{{ b.fila }}{{ b.columna }}</span>
+                  }
+                </span>
+              </div>
+            }
+
+            @if (selectedTicketDetails.candy && selectedTicketDetails.candy.length > 0) {
+              <div style="border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 15px; padding-top: 10px;">
+                <span class="detail-label text-muted d-block mb-1">Candy Bar:</span>
+                @for (c of selectedTicketDetails.candy; track c.id) {
+                  <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;">
+                    <span>{{ c.cantidad }}x {{ c.candy_productos?.nombre }}</span>
+                    <span [style.color]="c.estado === 'entregado' ? 'var(--color-success)' : 'var(--color-warning)'" style="font-size: 0.8rem;">
+                      {{ c.estado | uppercase }}
+                    </span>
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="detail-row" style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+              <span class="detail-label text-muted">Total Pagado</span>
+              <span class="detail-value glow-primary-text" style="font-size: 1.2rem;">${{ selectedTicketDetails.ticket.precio_final }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
   }
 </div>

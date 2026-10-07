@@ -94,8 +94,9 @@ export class HomeComponent implements OnInit {
   }
 
   isPresaleAvailable(movie: Movie): boolean {
-    if (movie.precio_preventa && this.getDaysUntil(movie.fecha_estreno) <= 7) {
-      return true;
+    if (movie.precio_preventa) {
+      const today = this.supabaseService.getArgentinaDateString();
+      return movie.fecha_estreno > today;
     }
     return false;
   }

@@ -148,4 +148,35 @@ export class ProfileComponent implements OnInit {
       this.cdr.detectChanges();
     }
   }
+
+  // --- Lógica del modal de detalle de entrada ---
+  showTicketModal = false;
+  loadingModal = false;
+  selectedTicketDetails: any = null;
+  selectedQrUrl = '';
+
+  async abrirDetalleEntrada(ticket: any) {
+    this.showTicketModal = true;
+    this.loadingModal = true;
+    this.selectedTicketDetails = null;
+    this.cdr.detectChanges();
+
+    try {
+      // Reutilizamos validateTicket que ya trae butacas, candy, sala y película completa.
+      this.selectedTicketDetails = await this.supabase.validateTicket(ticket.codigo_qr);
+      this.selectedQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(ticket.codigo_qr)}`;
+    } catch (e) {
+      console.error('Error al cargar detalle de entrada:', e);
+      alert('Hubo un error al cargar el detalle de la entrada.');
+      this.showTicketModal = false;
+    } finally {
+      this.loadingModal = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  cerrarModalEntrada() {
+    this.showTicketModal = false;
+    this.selectedTicketDetails = null;
+  }
 }
