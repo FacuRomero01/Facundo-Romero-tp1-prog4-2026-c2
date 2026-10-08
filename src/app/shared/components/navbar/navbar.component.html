@@ -1,11 +1,17 @@
 <nav class="navbar">
   <div class="navbar-brand">
-    <a routerLink="/home">
-      <span class="logo-text"><span class="neon">CINE</span>MARDO</span>
-    </a>
+    @if (isEmpleado() && !isAdmin()) {
+      <a routerLink="/validador">
+        <span class="logo-text"><span class="neon">CINE</span>MARDO</span>
+      </a>
+    } @else {
+      <a routerLink="/home">
+        <span class="logo-text"><span class="neon">CINE</span>MARDO</span>
+      </a>
+    }
   </div>
   <div class="navbar-menu">
-    @if (!isLoginPage()) {
+    @if (!isLoginPage() && (!isEmpleado() || isAdmin())) {
       <a routerLink="/home" routerLinkActive="active">Cartelera</a>
     }
     
@@ -19,7 +25,9 @@
     
     <div class="user-actions">
       @if (isLoggedIn()) {
-        <a routerLink="/profile" routerLinkActive="active">Mi Perfil</a>
+        @if (!isEmpleado() || isAdmin()) {
+          <a routerLink="/profile" routerLinkActive="active">Mi Perfil</a>
+        }
         <button class="btn btn-logout" (click)="logout()">Salir</button>
       } @else {
         <a routerLink="/login" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem;">Ingresar</a>

@@ -23,6 +23,14 @@ const employeeGuard = async () => {
   return (profile?.rol === 'empleado' || profile?.rol === 'admin') ? true : inject(Router).parseUrl('/home');
 };
 
+const homeGuard = async () => {
+  const supabase = inject(SupabaseService);
+  const session = (await supabase.auth.getSession())?.data?.session;
+  if (!session) return true; // Guests can see home
+  const profile = await supabase.getProfile(session.user.id);
+  return profile?.rol === 'empleado' ? inject(Router).parseUrl('/validador') : true;
+};
+
 export const routes: Routes = [
   {
     path: '',
@@ -31,6 +39,7 @@ export const routes: Routes = [
   },
   {
     path: 'home',
+    canActivate: [homeGuard],
     loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
   },
   {
@@ -43,6 +52,7 @@ export const routes: Routes = [
   },
   {
     path: 'checkout/:funcionId',
+    canActivate: [homeGuard],
     loadComponent: () => import('./features/checkout/booking-flow/booking-flow.component').then(m => m.BookingFlowComponent)
   },
   {
@@ -57,7 +67,7 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
-    canActivate: [authGuard],
+    canActivate: [authGuard, homeGuard],
     loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
   },
   {

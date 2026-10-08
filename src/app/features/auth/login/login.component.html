@@ -35,7 +35,18 @@
         </div>
       </form>
 
-      <div class="auth-links text-center">
+      <div class="quick-access mt-4 text-center">
+        <p class="text-muted mb-2" style="font-size: 0.9rem;">Acceso Rápido:</p>
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+          <button type="button" class="btn btn-sm btn-outline-primary" style="margin: 5px;" (click)="autoFill('admin@gmail.com', '111111')">Admin</button>
+          <button type="button" class="btn btn-sm btn-outline-primary" style="margin: 5px;" (click)="autoFill('empleado@gmail.com', '111111')">Empleado</button>
+          <button type="button" class="btn btn-sm btn-outline-primary" style="margin: 5px;" (click)="autoFill('cliente@gmail.com', '111111')">Cliente</button>
+          <button type="button" class="btn btn-sm btn-outline-primary" style="margin: 5px;" (click)="autoFill('cliente10anos@gmail.com', '111111')">Cliente < 18</button>
+          <button type="button" class="btn btn-sm btn-outline-primary" style="margin: 5px;" (click)="autoFill('cliente50@gmail.com', '111111')">Cliente > 50</button>
+        </div>
+      </div>
+
+      <div class="auth-links text-center mt-3">
         <p class="text-muted">¿No tenés cuenta? <a routerLink="/register" class="text-accent">Registrate acá</a></p>
       </div>
     </div>

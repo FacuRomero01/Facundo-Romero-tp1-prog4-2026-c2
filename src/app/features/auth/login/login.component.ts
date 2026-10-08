@@ -28,7 +28,12 @@ export class LoginComponent implements OnInit {
   async ngOnInit() {
     const session = await this.supabase.auth.getSession();
     if (session?.data?.session) {
-      this.router.navigate(['/home']);
+      const profile = await this.supabase.getProfile(session.data.session.user.id);
+      if (profile?.rol === 'empleado') {
+        this.router.navigate(['/validador']);
+      } else {
+        this.router.navigate(['/home']);
+      }
     }
   }
 
@@ -42,8 +47,18 @@ export class LoginComponent implements OnInit {
     const { email, password } = this.loginForm.value;
 
     try {
-      await this.supabase.signIn(email!, password!);
-      this.router.navigate(['/home']);
+      const { user } = await this.supabase.signIn(email!, password!);
+      
+      if (user) {
+        const profile = await this.supabase.getProfile(user.id);
+        if (profile?.rol === 'empleado') {
+          this.router.navigate(['/validador']);
+        } else {
+          this.router.navigate(['/home']);
+        }
+      } else {
+        this.router.navigate(['/home']);
+      }
     } catch (error: any) {
       if (error.message === 'Invalid login credentials') {
         this.errorMessage = 'El correo o la contraseña son incorrectos.';
@@ -54,5 +69,12 @@ export class LoginComponent implements OnInit {
       this.loading = false;
       this.cdr.detectChanges();
     }
+  }
+
+  autoFill(email: string, pass: string) {
+    this.loginForm.patchValue({
+      email: email,
+      password: pass
+    });
   }
 }
