@@ -203,4 +203,40 @@ export class PaymentComponent implements OnInit {
       this.cdr.detectChanges();
     }
   }
+
+  async downloadTicket() {
+    try {
+      const { jsPDF } = await import('jspdf');
+      const html2canvas = (await import('html2canvas')).default;
+      
+      const element = document.getElementById('ticketToDownload');
+      if (!element) return;
+      
+      // We take a screenshot of the element
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: '#0f0f15', // Matches the neon background typical in this app
+        useCORS: true
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      
+      const ticketName = this.ticketCode ? this.ticketCode.split('-')[0] : 'comprobante';
+      pdf.save(`ticket-compra-${ticketName}.pdf`);
+      
+    } catch (e) {
+      console.error('Error generando PDF', e);
+      this.toast.show('Error al generar el comprobante PDF', 'error');
+    }
+  }
 }

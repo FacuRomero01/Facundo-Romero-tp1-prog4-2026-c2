@@ -127,10 +127,13 @@ export class BookingService {
       puntosGanados = Math.floor(finalPrice / config.monto_dinero) * config.puntos_otorgados;
     }
 
+    const ticketId = crypto.randomUUID();
+
     // Inserto el ticket
-    const { data: ticket, error: ticketError } = await this.supabase.client
+    const { error: ticketError } = await this.supabase.client
       .from('tickets')
       .insert({
+        id: ticketId,
         funcion_id: funcionId,
         usuario_id: userId || null,
         codigo_qr: qrData,
@@ -141,9 +144,7 @@ export class BookingService {
         entradas_pagadas_dinero: entradasDinero,
         entradas_pagadas_puntos: entradasPuntos,
         combo_id: comboId || null
-      })
-      .select('id, codigo_qr')
-      .single();
+      });
 
     if (ticketError) throw ticketError;
 
@@ -151,7 +152,7 @@ export class BookingService {
     if (seatsToReserve.length > 0) {
       const inserts = seatsToReserve.map(asiento => ({
         funcion_id: funcionId,
-        ticket_id: ticket.id,
+        ticket_id: ticketId,
         fila: asiento.row,
         columna: asiento.col
       }));
@@ -168,7 +169,7 @@ export class BookingService {
       this.candyItems().forEach(itemCandy => {
         if (itemCandy.quantity > 0) {
           candyInserts.push({
-            ticket_id: ticket.id,
+            ticket_id: ticketId,
             producto_id: itemCandy.id,
             cantidad: itemCandy.quantity,
             metodo_pago: 'dinero'
@@ -176,7 +177,7 @@ export class BookingService {
         }
         if (itemCandy.quantityPoints > 0) {
           candyInserts.push({
-            ticket_id: ticket.id,
+            ticket_id: ticketId,
             producto_id: itemCandy.id,
             cantidad: itemCandy.quantityPoints,
             metodo_pago: 'puntos'
@@ -193,7 +194,7 @@ export class BookingService {
       if (comboItems && comboItems.length > 0) {
         comboItems.forEach((ci: any) => {
           candyInserts.push({
-            ticket_id: ticket.id,
+            ticket_id: ticketId,
             producto_id: ci.candy_producto_id,
             cantidad: ci.cantidad,
             metodo_pago: 'dinero'
@@ -220,7 +221,7 @@ export class BookingService {
         .from('historial_puntos')
         .insert({
           usuario_id: userId,
-          ticket_id: ticket.id,
+          ticket_id: ticketId,
           puntos_ganados: puntosGanados,
           puntos_gastados: puntosGastados,
           motivo: comboId ? 'Compra de Combo' : 'Compra de Entradas/Candy',
@@ -247,7 +248,7 @@ export class BookingService {
       }
     }
 
-    return ticket.codigo_qr;
+    return qrData;
   }
 
   subscribeToSeatChanges(funcionId: string) {

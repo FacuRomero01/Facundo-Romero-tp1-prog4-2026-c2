@@ -170,7 +170,11 @@ export class SupabaseService {
       .select('*, funciones(peliculas(titulo, duracion_minutos), salas(nombre), fecha_hora)')
       .eq('codigo_qr', qrCode)
       .single();
-    if (error) throw new Error('Ticket no encontrado o inválido.');
+    if (error || !ticket) throw new Error('Ticket no encontrado o inválido.');
+    
+    if (ticket.estado === 'cancelado') {
+      throw new Error('Esta entrada se encuentra cancelada.');
+    }
     
     const { data: butacas } = await this.client
       .from('butacas_ocupadas')

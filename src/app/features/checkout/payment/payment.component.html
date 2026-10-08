@@ -121,75 +121,80 @@
       </button>
     </div>
   } @else {
-    <div class="ticket-card neon-card text-center">
-      <div class="ticket-header">
-        <h3 class="glow-text">¡Reserva Confirmada!</h3>
-        <p class="text-muted">Presentá este código QR en el ingreso de la sala.</p>
-      </div>
-      
-      <div class="qr-container" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-        <div class="qr-frame">
-          <img [src]="qrCodeUrl" alt="Código QR de la Entrada">
+    <div class="ticket-card-wrapper" style="display: flex; flex-direction: column; align-items: center;">
+      <div id="ticketToDownload" class="ticket-card neon-card text-center" style="width: 100%; max-width: 500px; padding: 30px;">
+        <div class="ticket-header">
+          <h3 class="glow-text">¡Reserva Confirmada!</h3>
+          <p class="text-muted">Presentá este código QR en el ingreso de la sala.</p>
         </div>
-        <p class="text-accent" style="margin-top: 15px; font-size: 1.5rem; font-weight: 700; letter-spacing: 2px;">{{ ticketCode }}</p>
-      </div>
+        
+        <div class="qr-container" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+          <div class="qr-frame">
+            <img [src]="qrCodeUrl" alt="Código QR de la Entrada">
+          </div>
+          <p class="text-accent" style="margin-top: 15px; font-size: 1.5rem; font-weight: 700; letter-spacing: 2px;">{{ ticketCode }}</p>
+        </div>
 
-      <div class="ticket-details" style="text-align: left; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; margin-top: 20px;">
-        <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-          <span class="detail-label text-muted">Película</span>
-          <span class="detail-value text-accent">{{ bookingService.selectedFuncion()?.peliculas?.titulo }}</span>
-        </div>
-        <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-          <span class="detail-label text-muted">Función</span>
-          <span class="detail-value">{{ bookingService.selectedFuncion()?.fecha_hora | spanishDate:'short' }}</span>
-        </div>
-        <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-          <span class="detail-label text-muted">Sala</span>
-          <span class="detail-value">{{ bookingService.selectedFuncion()?.salas?.nombre }}</span>
-        </div>
-        <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-          <span class="detail-label text-muted">Butacas</span>
-          <span class="detail-value">
-            @for (asiento of selectedSeats(); track asiento.id) {
-              <span class="seat-badge badge badge-outline" style="margin-left: 5px;">{{ asiento.id }}</span>
+        <div class="ticket-details" style="text-align: left; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; margin-top: 20px;">
+          <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span class="detail-label text-muted">Película</span>
+            <span class="detail-value text-accent">{{ bookingService.selectedFuncion()?.peliculas?.titulo }}</span>
+          </div>
+          <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span class="detail-label text-muted">Función</span>
+            <span class="detail-value">{{ bookingService.selectedFuncion()?.fecha_hora | spanishDate:'short' }}</span>
+          </div>
+          <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span class="detail-label text-muted">Sala</span>
+            <span class="detail-value">{{ bookingService.selectedFuncion()?.salas?.nombre }}</span>
+          </div>
+          <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span class="detail-label text-muted">Butacas</span>
+            <span class="detail-value">
+              @for (asiento of selectedSeats(); track asiento.id) {
+                <span class="seat-badge badge badge-outline" style="margin-left: 5px;">{{ asiento.id }}</span>
+              }
+            </span>
+          </div>
+
+          @if (purchaseType === 'combo') {
+              <div class="detail-row candy-row" style="margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+                <span class="detail-label text-muted" style="display: block; margin-bottom: 10px;">Candy Bar Incluido</span>
+                <div class="detail-value">
+                  @for (item of selectedCombo()?.combo_candy_productos; track item.candy_productos?.nombre) {
+                    <div class="candy-item-ticket" style="font-size: 0.9rem;">{{ item.cantidad }}x {{ item.candy_productos?.nombre || 'Producto' }}</div>
+                  }
+                </div>
+              </div>
             }
-          </span>
-        </div>
 
-        @if (purchaseType === 'combo') {
+            @if (candyCost() > 0 || totalPuntosGastados() > (entradasPuntos * costoPuntoEntrada)) {
             <div class="detail-row candy-row" style="margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
-              <span class="detail-label text-muted" style="display: block; margin-bottom: 10px;">Candy Bar Incluido</span>
+              <span class="detail-label text-muted" style="display: block; margin-bottom: 10px;">Candy Bar</span>
               <div class="detail-value">
-                @for (item of selectedCombo()?.combo_candy_productos; track item.candy_productos?.nombre) {
-                  <div class="candy-item-ticket" style="font-size: 0.9rem;">{{ item.cantidad }}x {{ item.candy_productos?.nombre || 'Producto' }}</div>
+                @for (productoCandy of bookingService.candyItems(); track productoCandy.id) {
+                  @if (productoCandy.quantity > 0) {
+                    <div class="candy-item-ticket" style="font-size: 0.9rem;">{{ productoCandy.quantity }}x {{ productoCandy.name }}</div>
+                  }
+                  @if (productoCandy.quantityPoints > 0) {
+                    <div class="candy-item-ticket text-primary" style="font-size: 0.9rem;">{{ productoCandy.quantityPoints }}x {{ productoCandy.name }} (Canje)</div>
+                  }
                 }
               </div>
             </div>
           }
 
-          @if (candyCost() > 0 || totalPuntosGastados() > (entradasPuntos * costoPuntoEntrada)) {
-          <div class="detail-row candy-row" style="margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
-            <span class="detail-label text-muted" style="display: block; margin-bottom: 10px;">Candy Bar</span>
-            <div class="detail-value">
-              @for (productoCandy of bookingService.candyItems(); track productoCandy.id) {
-                @if (productoCandy.quantity > 0) {
-                  <div class="candy-item-ticket" style="font-size: 0.9rem;">{{ productoCandy.quantity }}x {{ productoCandy.name }}</div>
-                }
-                @if (productoCandy.quantityPoints > 0) {
-                  <div class="candy-item-ticket text-primary" style="font-size: 0.9rem;">{{ productoCandy.quantityPoints }}x {{ productoCandy.name }} (Canje)</div>
-                }
-              }
-            </div>
+          <div class="ticket-total" style="display: flex; justify-content: space-between; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; font-weight: bold;">
+            <span>Total Abonado</span>
+            <span class="text-primary">{{ finalCost() | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
           </div>
-        }
-
-        <div class="ticket-total" style="display: flex; justify-content: space-between; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; font-weight: bold;">
-          <span>Total Abonado</span>
-          <span class="text-primary">{{ finalCost() | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
         </div>
       </div>
       
-      <button class="btn btn-secondary w-100 mt-2" routerLink="/home" style="margin-top: 30px;">Volver al Inicio</button>
+      <div style="display: flex; gap: 15px; width: 100%; max-width: 500px; margin-top: 30px;">
+        <button class="btn btn-primary w-100" (click)="downloadTicket()"><i class="icon-download"></i> Descargar Comprobante</button>
+        <button class="btn btn-secondary w-100" routerLink="/home">Volver al Inicio</button>
+      </div>
     </div>
   }
 </div>

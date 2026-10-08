@@ -48,6 +48,8 @@ export class ProfileComponent implements OnInit {
 
       if (tickets) {
         for (const t of tickets) {
+          if (t.estado === 'cancelado') continue;
+          
           if (t.funciones && t.funciones.fecha_hora) {
             const funcionDate = new Date(t.funciones.fecha_hora);
             if (funcionDate > now) {
@@ -101,17 +103,48 @@ export class ProfileComponent implements OnInit {
 
     try {
       this.loading = true;
-      await this.supabase.client.from('tickets').update({ estado: 'cancelado' }).eq('id', ticket.id);
-      await this.supabase.client.from('butacas_ocupadas').delete().eq('ticket_id', ticket.id);
+      const { data: updatedTickets, error: err1 } = await this.supabase.client
+        .from('tickets')
+        .update({ estado: 'cancelado' })
+        .eq('id', ticket.id)
+        .select();
+        
+      if (err1) throw err1;
+      if (!updatedTickets || updatedTickets.length === 0) {
+        throw new Error('RLS Blocked Update: No se pudo actualizar el estado del ticket en la base de datos.');
+      }
+      
+      const { error: err2 } = await this.supabase.client.from('butacas_ocupadas').delete().eq('ticket_id', ticket.id);
+      if (err2) throw err2;
       
       const newCredit = (this.userProfile.credito || 0) + ticket.precio_final;
-      await this.supabase.client.from('perfiles').update({ credito: newCredit }).eq('id', this.userProfile.id);
+      
+      const puntosGastados = ticket.puntos_gastados || 0;
+      const puntosGanados = ticket.puntos_ganados || 0;
+      const newPoints = (this.userProfile.puntos || 0) + puntosGastados - puntosGanados;
+      
+      const { error: err3 } = await this.supabase.client.from('perfiles').update({ 
+        credito: newCredit,
+        puntos: newPoints > 0 ? newPoints : 0 
+      }).eq('id', this.userProfile.id);
+      if (err3) throw err3;
+
+      if (puntosGastados > 0 || puntosGanados > 0) {
+        const { error: err4 } = await this.supabase.client.from('historial_puntos').insert({
+          usuario_id: this.userProfile.id,
+          ticket_id: ticket.id,
+          puntos_ganados: puntosGastados, // Reverting logic for history tracking (spent becomes earned)
+          puntos_gastados: puntosGanados, // Earned becomes spent to deduct
+          motivo: 'Cancelación de Entradas/Candy',
+        });
+        if (err4) throw err4;
+      }
       
       alert(`Entrada cancelada. Se acreditaron $${ticket.precio_final} a tu cuenta.`);
       await this.loadData();
     } catch (e) {
       console.error(e);
-      alert('Error al cancelar');
+      alert('Error al cancelar la entrada. Por favor, intentá de nuevo.');
     } finally {
       this.loading = false;
       this.cdr.detectChanges();
