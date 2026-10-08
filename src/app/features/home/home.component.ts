@@ -94,18 +94,11 @@ export class HomeComponent implements OnInit {
   }
 
   isPresaleAvailable(movie: Movie): boolean {
-    if (movie.precio_preventa) {
-      const today = this.supabaseService.getArgentinaDateString();
-      return movie.fecha_estreno > today;
-    }
-    return false;
+    return this.supabaseService.isPresaleActive(movie);
   }
 
   getDaysUntil(dateStr: string): number {
-    const today = new Date();
-    const release = new Date(dateStr);
-    const diff = release.getTime() - today.getTime();
-    return Math.ceil(diff / (1000 * 3600 * 24));
+    return this.supabaseService.getDaysUntil(dateStr);
   }
 
   handleUpcomingClick(movie: Movie) {

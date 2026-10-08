@@ -34,11 +34,8 @@ export class PaymentComponent implements OnInit {
     if (!funcion) return 4500;
     
     const movie = funcion.peliculas;
-    if (movie?.precio_preventa) {
-       const today = this.supabase.getArgentinaDateString();
-       if (movie.fecha_estreno > today) {
+    if (this.supabase.isPresaleActive(movie)) {
          return movie.precio_preventa;
-       }
     }
     return funcion.precio_base || 4500;
   });

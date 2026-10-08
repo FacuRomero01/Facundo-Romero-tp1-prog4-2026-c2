@@ -89,9 +89,11 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   private getEmptyFuncion() {
+    const now = new Date();
+    const localStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0,16);
     return {
       pelicula_id: '',
-      fecha_hora: new Date().toISOString().slice(0,16),
+      fecha_hora: localStr,
       formato: '2D',
       idioma: 'Castellano',
       precio_base: 4500

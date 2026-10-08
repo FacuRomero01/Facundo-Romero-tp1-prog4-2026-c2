@@ -63,6 +63,21 @@ export class SupabaseService {
     return formatter.format(new Date());
   }
 
+  public getDaysUntil(dateStr: string): number {
+    const todayStr = this.getArgentinaDateString();
+    // Parseando en horario local de Argentina o forzando mediodía UTC para evitar saltos de hora
+    const today = new Date(todayStr + 'T12:00:00Z');
+    const release = new Date(dateStr + 'T12:00:00Z');
+    const diff = release.getTime() - today.getTime();
+    return Math.round(diff / (1000 * 3600 * 24));
+  }
+
+  public isPresaleActive(movie: any): boolean {
+    if (!movie || !movie.precio_preventa) return false;
+    const daysUntil = this.getDaysUntil(movie.fecha_estreno);
+    return daysUntil >= 1 && daysUntil <= 7;
+  }
+
   async getMovies(): Promise<Movie[]> {
     const today = this.getArgentinaDateString();
     const { data, error } = await this.client

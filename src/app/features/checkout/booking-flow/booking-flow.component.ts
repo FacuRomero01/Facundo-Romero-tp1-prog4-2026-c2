@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SeatMapComponent } from '../seat-map/seat-map.component';
 import { CandyBarComponent } from '../candy-bar/candy-bar.component';
@@ -23,6 +23,7 @@ export class BookingFlowComponent implements OnInit {
   private toast = inject(ToastService);
   bookingService = inject(BookingService);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   currentStep = 1;
   funciones: any[] = [];
@@ -69,6 +70,16 @@ export class BookingFlowComponent implements OnInit {
     if (this.peliculaId) {
       try {
         this.pelicula = await this.supabase.getMovieById(this.peliculaId);
+        
+        if (this.pelicula) {
+          const daysUntilRelease = this.supabase.getDaysUntil(this.pelicula.fecha_estreno);
+          if (daysUntilRelease > 7) {
+            this.toast.show('La preventa para esta película aún no está habilitada.', 'error');
+            this.router.navigate(['/']);
+            return;
+          }
+        }
+
         this.funciones = await this.supabase.getFunciones(this.peliculaId);
         
         // Fetch reviews...
